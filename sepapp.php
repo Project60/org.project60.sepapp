@@ -269,7 +269,7 @@ function sepapp_civicrm_enable() {
     );
     $result = civicrm_api3('PaymentProcessorType', 'create', $payment_processor_data);
     $sdd_pp_type_ids[$result['id']] = 'Payment_SDD';
-    CRM_Core_Error::debug_log_message("org.project60.sepa_dd: created payment processor with name PP_SDD_PROCESSOR_TYPE");
+    CRM_Sepapp_Configuration::log("org.project60.sepa_dd: created payment processor with name PP_SDD_PROCESSOR_TYPE");
 
   } else {
     // already exists => enable if not enabled
@@ -302,7 +302,7 @@ function sepapp_civicrm_enable() {
     );
     $result = civicrm_api3('PaymentProcessorType', 'create', $payment_processor_data);
     $sdd_pp_type_ids[$result['id']] = 'Payment_SDDNG';
-    CRM_Core_Error::debug_log_message("org.project60.sepa_dd: created payment processor with name 'SEPA_Direct_Debit_NG'");
+    CRM_Sepapp_Configuration::log("org.project60.sepa_dd: created payment processor with name 'SEPA_Direct_Debit_NG'");
 
   } else {
     // already exists => enable if not enabled

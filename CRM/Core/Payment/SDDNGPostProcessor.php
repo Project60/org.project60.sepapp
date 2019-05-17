@@ -165,7 +165,7 @@ class CRM_Core_Payment_SDDNGPostProcessor implements API_Wrapper {
     } catch (Exception $ex) {
       // that's not good... but we can't leave it like this...
       $error_message = $ex->getMessage();
-      CRM_Core_Error::debug_log_message("SDD reset contribution via API failed ('{$error_message}'), using SQL...");
+      CRM_Sepapp_Configuration::log("SDD reset contribution via API failed ('{$error_message}'), using SQL...", CRM_Sepapp_Configuration::LOG_LEVEL_ERROR);
       CRM_Core_DAO::executeQuery("UPDATE civicrm_contribution SET contribution_status_id = %1, payment_instrument_id = %2 WHERE id = %3;", array(
           1 => array($status_pending,        'Integer'),
           2 => array($payment_instrument_id, 'Integer'),
@@ -226,7 +226,7 @@ class CRM_Core_Payment_SDDNGPostProcessor implements API_Wrapper {
     } catch (Exception $ex) {
       // that's not good... but we can't leave it like this...
       $error_message = $ex->getMessage();
-      CRM_Core_Error::debug_log_message("SDD reset contribution via API failed ('{$error_message}'), using SQL...");
+      CRM_Sepapp_Configuration::log("SDD reset contribution via API failed ('{$error_message}'), using SQL...", CRM_Sepapp_Configuration::LOG_LEVEL_ERROR);
       CRM_Core_DAO::executeQuery("UPDATE civicrm_contribution_recur SET contribution_status_id = %1, payment_instrument_id = %2 WHERE id = %3;", array(
           1 => array($status_pending,        'Integer'),
           2 => array($payment_instrument_id, 'Integer'),

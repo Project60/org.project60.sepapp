@@ -203,7 +203,7 @@ class CRM_Core_Payment_SDDNG extends CRM_Core_Payment {
     $pending_contribution_id = self::getPendingContributionID();
     if ($contribution_id != $pending_contribution_id) {
       // something's wrong here
-      CRM_Core_Error::debug_log_message("SDD PP workflow error");
+      CRM_Sepapp_Configuration::log("SDD PP workflow error", CRM_Sepapp_Configuration::LOG_LEVEL_ERROR);
       return NULL;
     }
 
