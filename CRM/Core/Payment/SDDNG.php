@@ -85,6 +85,7 @@ class CRM_Core_Payment_SDDNG extends CRM_Core_Payment {
    * @throws \Civi\Payment\Exception\PaymentProcessorException
    */
   public function doDirectPayment(&$params) {
+    CRM_Sepapp_Configuration::log("doDirectPayment called: " . json_encode($params), CRM_Sepapp_Configuration::LOG_LEVEL_DEBUG);
     $original_parameters = $params;
 
     // extract SEPA data
@@ -97,17 +98,20 @@ class CRM_Core_Payment_SDDNG extends CRM_Core_Payment {
     // verify IBAN
     $bad_iban = CRM_Sepa_Logic_Verification::verifyIBAN($params['iban']);
     if ($bad_iban) {
+      CRM_Sepapp_Configuration::log("IBAN issue: {$bad_iban}");
       throw new \Civi\Payment\Exception\PaymentProcessorException($bad_iban);
     }
 
     // verify BIC
     $bad_bic  = CRM_Sepa_Logic_Verification::verifyBIC($params['bic']);
     if ($bad_bic) {
+      CRM_Sepapp_Configuration::log("BIC issue: {$bad_bic}");
       throw new \Civi\Payment\Exception\PaymentProcessorException($bad_bic);
     }
 
     // make sure there's not an pending mandate
     if (self::$_pending_mandate) {
+      CRM_Sepapp_Configuration::log("No pending mandate found. This is a workflow error.", CRM_Sepapp_Configuration::LOG_LEVEL_ERROR);
       throw new \Civi\Payment\Exception\PaymentProcessorException("SDD PaymentProcessor NG: workflow broken.");
     }
 
@@ -147,7 +151,7 @@ class CRM_Core_Payment_SDDNG extends CRM_Core_Payment {
         $this->_creditor = civicrm_api3('SepaCreditor', 'getsingle', array('id' => $creditor_id));
       } catch (Exception $ex) {
         // probably no creditor set, or creditor has been deleted - use default
-        CRM_Core_Error::debug_log_message("org.project60.sepa: creditor [{$creditor_id}] not found, SDDNG using default/any.");
+        CRM_Sepapp_Configuration::log("Creditor [{$creditor_id}] not found, SDDNG using default/any", CRM_Sepapp_Configuration::LOG_LEVEL_ERROR);
         $default_creditor_id = (int) CRM_Sepa_Logic_Settings::getSetting('batching_default_creditor');
         $creditors = civicrm_api3('SepaCreditor', 'get', array('id' => $default_creditor_id));
         $this->_creditor = reset($creditors['values']);
@@ -164,13 +168,14 @@ class CRM_Core_Payment_SDDNG extends CRM_Core_Payment {
    * @param $contribution_id
    */
   public static function processContribution($contribution_id) {
-    CRM_Core_Error::debug_log_message("createPendingMandate for {$contribution_id}??");
     if (!self::$_pending_mandate) {
+      CRM_Sepapp_Configuration::log("processContribution called w/o a pending mandate. This is a workflow error.", CRM_Sepapp_Configuration::LOG_LEVEL_ERROR);
       // nothing pending, nothing to do
       return;
     }
 
     // store contribution ID
+    CRM_Sepapp_Configuration::log("processContribution received [{$contribution_id}]", CRM_Sepapp_Configuration::LOG_LEVEL_DEBUG);
     self::$_pending_mandate['contribution_id'] = $contribution_id;
   }
 
@@ -184,6 +189,7 @@ class CRM_Core_Payment_SDDNG extends CRM_Core_Payment {
     if (!empty(self::$_pending_mandate['contributionID'])) {
       return self::$_pending_mandate['contributionID'];
     }
+    CRM_Sepapp_Configuration::log("getPendingContributionID couldn't find a contribution ID.", CRM_Sepapp_Configuration::LOG_LEVEL_DEBUG);
     return NULL;
   }
 
@@ -192,6 +198,7 @@ class CRM_Core_Payment_SDDNG extends CRM_Core_Payment {
       // nothing pending, nothing to do
       return NULL;
     }
+    CRM_Sepapp_Configuration::log("releasePendingMandateData for contribution ID [{$contribution_id}]", CRM_Sepapp_Configuration::LOG_LEVEL_DEBUG);
 
     $pending_contribution_id = self::getPendingContributionID();
     if ($contribution_id != $pending_contribution_id) {
