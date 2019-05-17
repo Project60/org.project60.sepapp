@@ -6,10 +6,10 @@
  * The ExtensionUtil class provides small stubs for accessing resources of this
  * extension.
  */
-class CRM_sepapp_ExtensionUtil {
+class CRM_Sepapp_ExtensionUtil {
   const SHORT_NAME = "sepapp";
   const LONG_NAME = "org.project60.sepapp";
-  const CLASS_PREFIX = "CRM_sepapp";
+  const CLASS_PREFIX = "CRM_Sepapp";
 
   /**
    * Translate a string using the extension's domain.

@@ -1,7 +1,7 @@
 <?php
 
 require_once 'sepapp.civix.php';
-use CRM_sepapp_ExtensionUtil as E;
+use CRM_Sepapp_ExtensionUtil as E;
 
 
 /**
@@ -205,22 +205,27 @@ function sepapp_civicrm_postProcess( $formName, &$form ) {
   // SDD: make sure mandate is created:
   CRM_Core_Payment_SDDNGPostProcessor::createPendingMandate();
 
+  // also: check payment processor
   if ("CRM_Admin_Form_PaymentProcessor" == $formName) {
     $pp_id = $form->getVar('_id');
     if ($pp_id) {
-      $pp = civicrm_api3("PaymentProcessorType", "getsingle", array("id" => $pp_id));
-      if ($pp['class_name'] = "Payment_SDD" || $pp['class_name'] == 'Payment_SDDNG') {
-        $paymentProcessor = civicrm_api3('PaymentProcessor', 'getsingle',
-            array('name' => $form->_submitValues['name'], 'is_test' => 0));
+      try {
+        $pp = civicrm_api3("PaymentProcessor", "getsingle", array("id" => $pp_id));
+        if ($pp['class_name'] = "Payment_SDD" || $pp['class_name'] == 'Payment_SDDNG') {
+          $paymentProcessor = civicrm_api3('PaymentProcessor', 'getsingle',
+              array('name' => $form->_submitValues['name'], 'is_test' => 0));
 
-        $creditor_id = $form->_submitValues['user_name'];
-        $test_creditor_id = $form->_submitValues['test_user_name'];
-        $pp_id = $paymentProcessor['id'];
+          $creditor_id = $form->_submitValues['user_name'];
+          $test_creditor_id = $form->_submitValues['test_user_name'];
+          $pp_id = $paymentProcessor['id'];
 
-        // save settings
-        // FIXME: we might consider saving this as a JSON object
-        CRM_Core_BAO_Setting::setItem($creditor_id,      'SEPA Direct Debit PP', 'pp'.$pp_id);
-        CRM_Core_BAO_Setting::setItem($test_creditor_id, 'SEPA Direct Debit PP', 'pp_test'.$pp_id);
+          // save settings
+          // FIXME: we might consider saving this as a JSON object
+          CRM_Core_BAO_Setting::setItem($creditor_id,      'SEPA Direct Debit PP', 'pp'.$pp_id);
+          CRM_Core_BAO_Setting::setItem($test_creditor_id, 'SEPA Direct Debit PP', 'pp_test'.$pp_id);
+        }
+      } catch (Exception $ex) {
+        throw new Exception("Couldn't find PaymentProcessorType [{$pp_id}]");
       }
     }
 
