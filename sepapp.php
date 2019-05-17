@@ -17,7 +17,7 @@ define('PP_SDD_PROCESSOR_TYPE_NEW', 'SEPA_Direct_Debit_NG');
 /**
  * buildForm Hook for payment processor
  */
-function sepa_pp_buildForm ( $formName, &$form ) {
+function sepapp_civicrm_buildForm ( $formName, &$form ) {
   if ($formName == "CRM_Admin_Form_PaymentProcessor" ) {					// PAYMENT PROCESSOR CONFIGURATION PAGE
     // get payment processor id
     $pp_id = $form->getVar('_id');
@@ -201,7 +201,7 @@ function sepa_pp_buildForm ( $formName, &$form ) {
  * postProcess Hook for payment processor
  * (old approach)
  */
-function sepa_pp_postProcess( $formName, &$form ) {
+function sepapp_civicrm_postProcess( $formName, &$form ) {
   // SDD: make sure mandate is created:
   CRM_Core_Payment_SDDNGPostProcessor::createPendingMandate();
 
@@ -239,7 +239,9 @@ function sepa_pp_postProcess( $formName, &$form ) {
 /**
  * Will install the SEPA payment processor
  */
-function sepa_pp_enable() {
+function sepapp_civicrm_enable() {
+  _sepapp_civix_civicrm_enable();
+
   // INSTALL OLD PROCESSOR
   $sdd_pp_type_ids = [];
   $sdd_pp = civicrm_api3('PaymentProcessorType', 'get', array('name' => PP_SDD_PROCESSOR_TYPE));
@@ -323,7 +325,9 @@ function sepa_pp_enable() {
 /**
  * Will disable the SEPA payment processor
  */
-function sepa_pp_disable() {
+function sepapp_civicrm_disable() {
+  _sepapp_civix_civicrm_disable();
+
   // get payment processor...
   $type_ids = [];
   $sdd_pp_types = civicrm_api3('PaymentProcessorType', 'get', array(
@@ -346,6 +350,17 @@ function sepa_pp_disable() {
           'id'         => $sdd_pp['id'],
           'class_name' => 'Payment_Dummy']);
     }
+  }
+}
+
+/**
+ * Implements hook_civicrm_apiWrappers to prevent people from deleting
+ *   contributions connected to SDD mandates.
+ */
+function sepapp_civicrm_apiWrappers(&$wrappers, $apiRequest) {
+  // add a wrapper for the payment processor
+  if ($apiRequest['entity'] == 'Contribution' && $apiRequest['action'] == 'completetransaction') {
+    $wrappers[] = new CRM_Core_Payment_SDDNGPostProcessor();
   }
 }
 
@@ -393,24 +408,6 @@ function sepapp_civicrm_postInstall() {
  */
 function sepapp_civicrm_uninstall() {
   _sepapp_civix_civicrm_uninstall();
-}
-
-/**
- * Implements hook_civicrm_enable().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_enable
- */
-function sepapp_civicrm_enable() {
-  _sepapp_civix_civicrm_enable();
-}
-
-/**
- * Implements hook_civicrm_disable().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_disable
- */
-function sepapp_civicrm_disable() {
-  _sepapp_civix_civicrm_disable();
 }
 
 /**

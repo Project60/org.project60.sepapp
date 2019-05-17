@@ -17,6 +17,9 @@
   <releaseDate></releaseDate>
   <version>0.1</version>
   <develStage>dev</develStage>
+  <requires>
+    <ext>org.project60.sepa</ext>
+  </requires>
   <compatibility>
     <ver>5.0</ver>
   </compatibility>
