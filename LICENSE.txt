@@ -1,4 +1,4 @@
-Package: org.project60.sepadd
+Package: org.project60.sepapp
 Copyright (C) 2019, B. Endres <endres@systopia.de>
 Licensed under the GNU Affero Public License 3.0 (below).
 

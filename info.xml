@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<extension key="org.project60.sepadd" type="module">
-  <file>sepadd</file>
+<extension key="org.project60.sepapp" type="module">
+  <file>sepapp</file>
   <name>CiviSEPA Payment Processor</name>
   <description>Provides a CiviCRM payment processor for the CiviSEPA extension</description>
   <license>AGPL-3.0</license>
@@ -9,9 +9,9 @@
     <email>endres@systopia.de</email>
   </maintainer>
   <urls>
-    <url desc="Main Extension Page">https://github.com/Project60/org.project60.sepadd</url>
-    <url desc="Documentation">https://github.com/Project60/org.project60.sepadd</url>
-    <url desc="Support">https://github.com/Project60/org.project60.sepadd/issues</url>
+    <url desc="Main Extension Page">https://github.com/Project60/org.project60.sepapp</url>
+    <url desc="Documentation">https://github.com/Project60/org.project60.sepapp</url>
+    <url desc="Support">https://github.com/Project60/org.project60.sepapp/issues</url>
     <url desc="Licensing">http://www.gnu.org/licenses/agpl-3.0.html</url>
   </urls>
   <releaseDate></releaseDate>
@@ -22,6 +22,6 @@
   </compatibility>
   <comments>This used to be part of CiviSEPA</comments>
   <civix>
-    <namespace>CRM/Sepadd</namespace>
+    <namespace>CRM/sepapp</namespace>
   </civix>
 </extension>

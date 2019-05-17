@@ -1,4 +1,4 @@
-# org.project60.sepadd
+# org.project60.sepapp
 
 ![Screenshot](/images/screenshot.png)
 
@@ -22,7 +22,7 @@ install it with the command-line tool [cv](https://github.com/civicrm/cv).
 
 ```bash
 cd <extension-dir>
-cv dl org.project60.sepadd@https://github.com/FIXME/org.project60.sepadd/archive/master.zip
+cv dl org.project60.sepapp@https://github.com/FIXME/org.project60.sepapp/archive/master.zip
 ```
 
 ## Installation (CLI, Git)
@@ -31,8 +31,8 @@ Sysadmins and developers may clone the [Git](https://en.wikipedia.org/wiki/Git) 
 install it with the command-line tool [cv](https://github.com/civicrm/cv).
 
 ```bash
-git clone https://github.com/FIXME/org.project60.sepadd.git
-cv en sepadd
+git clone https://github.com/FIXME/org.project60.sepapp.git
+cv en sepapp
 ```
 
 ## Usage

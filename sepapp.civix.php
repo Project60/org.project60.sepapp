@@ -6,10 +6,10 @@
  * The ExtensionUtil class provides small stubs for accessing resources of this
  * extension.
  */
-class CRM_Sepadd_ExtensionUtil {
-  const SHORT_NAME = "sepadd";
-  const LONG_NAME = "org.project60.sepadd";
-  const CLASS_PREFIX = "CRM_Sepadd";
+class CRM_sepapp_ExtensionUtil {
+  const SHORT_NAME = "sepapp";
+  const LONG_NAME = "org.project60.sepapp";
+  const CLASS_PREFIX = "CRM_sepapp";
 
   /**
    * Translate a string using the extension's domain.
@@ -77,14 +77,14 @@ class CRM_Sepadd_ExtensionUtil {
 
 }
 
-use CRM_Sepadd_ExtensionUtil as E;
+use CRM_sepapp_ExtensionUtil as E;
 
 /**
  * (Delegated) Implements hook_civicrm_config().
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_config
  */
-function _sepadd_civix_civicrm_config(&$config = NULL) {
+function _sepapp_civix_civicrm_config(&$config = NULL) {
   static $configured = FALSE;
   if ($configured) {
     return;
@@ -114,8 +114,8 @@ function _sepadd_civix_civicrm_config(&$config = NULL) {
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_xmlMenu
  */
-function _sepadd_civix_civicrm_xmlMenu(&$files) {
-  foreach (_sepadd_civix_glob(__DIR__ . '/xml/Menu/*.xml') as $file) {
+function _sepapp_civix_civicrm_xmlMenu(&$files) {
+  foreach (_sepapp_civix_glob(__DIR__ . '/xml/Menu/*.xml') as $file) {
     $files[] = $file;
   }
 }
@@ -125,9 +125,9 @@ function _sepadd_civix_civicrm_xmlMenu(&$files) {
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_install
  */
-function _sepadd_civix_civicrm_install() {
-  _sepadd_civix_civicrm_config();
-  if ($upgrader = _sepadd_civix_upgrader()) {
+function _sepapp_civix_civicrm_install() {
+  _sepapp_civix_civicrm_config();
+  if ($upgrader = _sepapp_civix_upgrader()) {
     $upgrader->onInstall();
   }
 }
@@ -137,9 +137,9 @@ function _sepadd_civix_civicrm_install() {
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_postInstall
  */
-function _sepadd_civix_civicrm_postInstall() {
-  _sepadd_civix_civicrm_config();
-  if ($upgrader = _sepadd_civix_upgrader()) {
+function _sepapp_civix_civicrm_postInstall() {
+  _sepapp_civix_civicrm_config();
+  if ($upgrader = _sepapp_civix_upgrader()) {
     if (is_callable(array($upgrader, 'onPostInstall'))) {
       $upgrader->onPostInstall();
     }
@@ -151,9 +151,9 @@ function _sepadd_civix_civicrm_postInstall() {
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_uninstall
  */
-function _sepadd_civix_civicrm_uninstall() {
-  _sepadd_civix_civicrm_config();
-  if ($upgrader = _sepadd_civix_upgrader()) {
+function _sepapp_civix_civicrm_uninstall() {
+  _sepapp_civix_civicrm_config();
+  if ($upgrader = _sepapp_civix_upgrader()) {
     $upgrader->onUninstall();
   }
 }
@@ -163,9 +163,9 @@ function _sepadd_civix_civicrm_uninstall() {
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_enable
  */
-function _sepadd_civix_civicrm_enable() {
-  _sepadd_civix_civicrm_config();
-  if ($upgrader = _sepadd_civix_upgrader()) {
+function _sepapp_civix_civicrm_enable() {
+  _sepapp_civix_civicrm_config();
+  if ($upgrader = _sepapp_civix_upgrader()) {
     if (is_callable(array($upgrader, 'onEnable'))) {
       $upgrader->onEnable();
     }
@@ -178,9 +178,9 @@ function _sepadd_civix_civicrm_enable() {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_disable
  * @return mixed
  */
-function _sepadd_civix_civicrm_disable() {
-  _sepadd_civix_civicrm_config();
-  if ($upgrader = _sepadd_civix_upgrader()) {
+function _sepapp_civix_civicrm_disable() {
+  _sepapp_civix_civicrm_config();
+  if ($upgrader = _sepapp_civix_upgrader()) {
     if (is_callable(array($upgrader, 'onDisable'))) {
       $upgrader->onDisable();
     }
@@ -198,21 +198,21 @@ function _sepadd_civix_civicrm_disable() {
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_upgrade
  */
-function _sepadd_civix_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
-  if ($upgrader = _sepadd_civix_upgrader()) {
+function _sepapp_civix_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
+  if ($upgrader = _sepapp_civix_upgrader()) {
     return $upgrader->onUpgrade($op, $queue);
   }
 }
 
 /**
- * @return CRM_Sepadd_Upgrader
+ * @return CRM_sepapp_Upgrader
  */
-function _sepadd_civix_upgrader() {
-  if (!file_exists(__DIR__ . '/CRM/Sepadd/Upgrader.php')) {
+function _sepapp_civix_upgrader() {
+  if (!file_exists(__DIR__ . '/CRM/sepapp/Upgrader.php')) {
     return NULL;
   }
   else {
-    return CRM_Sepadd_Upgrader_Base::instance();
+    return CRM_sepapp_Upgrader_Base::instance();
   }
 }
 
@@ -226,7 +226,7 @@ function _sepadd_civix_upgrader() {
  * @param $pattern string, glob pattern, eg "*.txt"
  * @return array(string)
  */
-function _sepadd_civix_find_files($dir, $pattern) {
+function _sepapp_civix_find_files($dir, $pattern) {
   if (is_callable(array('CRM_Utils_File', 'findFiles'))) {
     return CRM_Utils_File::findFiles($dir, $pattern);
   }
@@ -235,7 +235,7 @@ function _sepadd_civix_find_files($dir, $pattern) {
   $result = array();
   while (!empty($todos)) {
     $subdir = array_shift($todos);
-    foreach (_sepadd_civix_glob("$subdir/$pattern") as $match) {
+    foreach (_sepapp_civix_glob("$subdir/$pattern") as $match) {
       if (!is_dir($match)) {
         $result[] = $match;
       }
@@ -261,8 +261,8 @@ function _sepadd_civix_find_files($dir, $pattern) {
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_managed
  */
-function _sepadd_civix_civicrm_managed(&$entities) {
-  $mgdFiles = _sepadd_civix_find_files(__DIR__, '*.mgd.php');
+function _sepapp_civix_civicrm_managed(&$entities) {
+  $mgdFiles = _sepapp_civix_find_files(__DIR__, '*.mgd.php');
   foreach ($mgdFiles as $file) {
     $es = include $file;
     foreach ($es as $e) {
@@ -286,12 +286,12 @@ function _sepadd_civix_civicrm_managed(&$entities) {
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_caseTypes
  */
-function _sepadd_civix_civicrm_caseTypes(&$caseTypes) {
+function _sepapp_civix_civicrm_caseTypes(&$caseTypes) {
   if (!is_dir(__DIR__ . '/xml/case')) {
     return;
   }
 
-  foreach (_sepadd_civix_glob(__DIR__ . '/xml/case/*.xml') as $file) {
+  foreach (_sepapp_civix_glob(__DIR__ . '/xml/case/*.xml') as $file) {
     $name = preg_replace('/\.xml$/', '', basename($file));
     if ($name != CRM_Case_XMLProcessor::mungeCaseType($name)) {
       $errorMessage = sprintf("Case-type file name is malformed (%s vs %s)", $name, CRM_Case_XMLProcessor::mungeCaseType($name));
@@ -315,12 +315,12 @@ function _sepadd_civix_civicrm_caseTypes(&$caseTypes) {
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_angularModules
  */
-function _sepadd_civix_civicrm_angularModules(&$angularModules) {
+function _sepapp_civix_civicrm_angularModules(&$angularModules) {
   if (!is_dir(__DIR__ . '/ang')) {
     return;
   }
 
-  $files = _sepadd_civix_glob(__DIR__ . '/ang/*.ang.php');
+  $files = _sepapp_civix_glob(__DIR__ . '/ang/*.ang.php');
   foreach ($files as $file) {
     $name = preg_replace(':\.ang\.php$:', '', basename($file));
     $module = include $file;
@@ -343,7 +343,7 @@ function _sepadd_civix_civicrm_angularModules(&$angularModules) {
  * @param string $pattern
  * @return array, possibly empty
  */
-function _sepadd_civix_glob($pattern) {
+function _sepapp_civix_glob($pattern) {
   $result = glob($pattern);
   return is_array($result) ? $result : array();
 }
@@ -357,7 +357,7 @@ function _sepadd_civix_glob($pattern) {
  * @param array $item - the item to insert (parent/child attributes will be
  *    filled for you)
  */
-function _sepadd_civix_insert_navigation_menu(&$menu, $path, $item) {
+function _sepapp_civix_insert_navigation_menu(&$menu, $path, $item) {
   // If we are done going down the path, insert menu
   if (empty($path)) {
     $menu[] = array(
@@ -378,7 +378,7 @@ function _sepadd_civix_insert_navigation_menu(&$menu, $path, $item) {
         if (!isset($entry['child'])) {
           $entry['child'] = array();
         }
-        $found = _sepadd_civix_insert_navigation_menu($entry['child'], implode('/', $path), $item, $key);
+        $found = _sepapp_civix_insert_navigation_menu($entry['child'], implode('/', $path), $item, $key);
       }
     }
     return $found;
@@ -388,9 +388,9 @@ function _sepadd_civix_insert_navigation_menu(&$menu, $path, $item) {
 /**
  * (Delegated) Implements hook_civicrm_navigationMenu().
  */
-function _sepadd_civix_navigationMenu(&$nodes) {
+function _sepapp_civix_navigationMenu(&$nodes) {
   if (!is_callable(array('CRM_Core_BAO_Navigation', 'fixNavigationMenu'))) {
-    _sepadd_civix_fixNavigationMenu($nodes);
+    _sepapp_civix_fixNavigationMenu($nodes);
   }
 }
 
@@ -398,17 +398,17 @@ function _sepadd_civix_navigationMenu(&$nodes) {
  * Given a navigation menu, generate navIDs for any items which are
  * missing them.
  */
-function _sepadd_civix_fixNavigationMenu(&$nodes) {
+function _sepapp_civix_fixNavigationMenu(&$nodes) {
   $maxNavID = 1;
   array_walk_recursive($nodes, function($item, $key) use (&$maxNavID) {
     if ($key === 'navID') {
       $maxNavID = max($maxNavID, $item);
     }
   });
-  _sepadd_civix_fixNavigationMenuItems($nodes, $maxNavID, NULL);
+  _sepapp_civix_fixNavigationMenuItems($nodes, $maxNavID, NULL);
 }
 
-function _sepadd_civix_fixNavigationMenuItems(&$nodes, &$maxNavID, $parentID) {
+function _sepapp_civix_fixNavigationMenuItems(&$nodes, &$maxNavID, $parentID) {
   $origKeys = array_keys($nodes);
   foreach ($origKeys as $origKey) {
     if (!isset($nodes[$origKey]['attributes']['parentID']) && $parentID !== NULL) {
@@ -423,7 +423,7 @@ function _sepadd_civix_fixNavigationMenuItems(&$nodes, &$maxNavID, $parentID) {
       $origKey = $newKey;
     }
     if (isset($nodes[$origKey]['child']) && is_array($nodes[$origKey]['child'])) {
-      _sepadd_civix_fixNavigationMenuItems($nodes[$origKey]['child'], $maxNavID, $nodes[$origKey]['attributes']['navID']);
+      _sepapp_civix_fixNavigationMenuItems($nodes[$origKey]['child'], $maxNavID, $nodes[$origKey]['attributes']['navID']);
     }
   }
 }
@@ -433,7 +433,7 @@ function _sepadd_civix_fixNavigationMenuItems(&$nodes, &$maxNavID, $parentID) {
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_alterSettingsFolders
  */
-function _sepadd_civix_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
+function _sepapp_civix_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
   static $configured = FALSE;
   if ($configured) {
     return;
@@ -454,7 +454,7 @@ function _sepadd_civix_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_entityTypes
  */
 
-function _sepadd_civix_civicrm_entityTypes(&$entityTypes) {
+function _sepapp_civix_civicrm_entityTypes(&$entityTypes) {
   $entityTypes = array_merge($entityTypes, array (
   ));
 }
