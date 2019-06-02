@@ -121,36 +121,56 @@ class CRM_Core_Payment_SDDNG extends CRM_Core_Payment {
     }
     $creditor = civicrm_api3('SepaCreditor', 'get', ['id' => $creditor_id]);
 
-    // create the mandate and link
+    // CREATE THE MANDATE
     if (empty($params['is_recur'])) {
       // OOFF Mandate
       $contribution_id = $this->getContributionId($params);
-      if (!$contribution_id) {
-        throw new Exception("No contribution found");
-      }
-      CRM_Sepapp_Configuration::log("createPendingMandate creating OOFF mandate", CRM_Sepapp_Configuration::LOG_LEVEL_ERROR);
-      $mandate = civicrm_api3('SepaMandate', 'create', [
-          'creditor_id'     => $creditor['id'],
-          'type'            => 'OOFF',
-          'iban'            => $params['iban'],
-          'bic'             => $params['bic'],
-          'status'          => 'OOFF',
-          'entity_table'    => 'civicrm_contribution',
-          'entity_id'       => $contribution_id,
-          'contact_id'      => $this->getContactId($params),
-          //'campaign_id'     => CRM_Utils_Array::value('campaign_id', $contribution),
-          'currency'        => CRM_Utils_Array::value('currency', $creditor, 'EUR'),
-          'date'            => date('YmdHis'),
-          'creation_date'   => date('YmdHis'),
-          'validation_date' => date('YmdHis'),
-          'source'          => CRM_Utils_Array::value('description', $params, ''),
-      ]);
-      CRM_Sepapp_Configuration::log("OOFF mandate [{$mandate['id']}] created.", CRM_Sepapp_Configuration::LOG_LEVEL_AUDIT);
+      if ($contribution_id) {
+        // there already is a contribution, create and adjust
+        CRM_Sepapp_Configuration::log("Creating OOFF mandate on contribution", CRM_Sepapp_Configuration::LOG_LEVEL_ERROR);
+        $mandate = civicrm_api3('SepaMandate', 'create', [
+            'creditor_id'     => $creditor['id'],
+            'type'            => 'OOFF',
+            'iban'            => $params['iban'],
+            'bic'             => $params['bic'],
+            'status'          => 'OOFF',
+            'entity_table'    => 'civicrm_contribution',
+            'entity_id'       => $contribution_id,
+            'contact_id'      => $this->getContactId($params),
+            //'campaign_id'     => CRM_Utils_Array::value('campaign_id', $contribution),
+            'currency'        => CRM_Utils_Array::value('currency', $creditor, 'EUR'),
+            'date'            => date('YmdHis'),
+            'creation_date'   => date('YmdHis'),
+            'validation_date' => date('YmdHis'),
+            'source'          => CRM_Utils_Array::value('description', $params, ''),
+        ]);
+        CRM_Sepapp_Configuration::log("OOFF mandate [{$mandate['id']}] on contribution created.", CRM_Sepapp_Configuration::LOG_LEVEL_AUDIT);
 
-      // reset contribution to 'Pending'
-      $ooff_payment = (int) CRM_Core_PseudoConstant::getKey('CRM_Contribute_BAO_Contribution', 'payment_instrument_id', 'OOFF');
-      $this->resetContribution($contribution_id, $ooff_payment);
-      CRM_Sepapp_Configuration::log("Contribution [{$contribution_id}] adjusted.", CRM_Sepapp_Configuration::LOG_LEVEL_AUDIT);
+        // reset contribution to 'Pending'
+        $ooff_payment = (int) CRM_Core_PseudoConstant::getKey('CRM_Contribute_BAO_Contribution', 'payment_instrument_id', 'OOFF');
+        $this->resetContribution($contribution_id, $ooff_payment);
+        CRM_Sepapp_Configuration::log("Contribution [{$contribution_id}] adjusted.", CRM_Sepapp_Configuration::LOG_LEVEL_AUDIT);
+
+      } else {
+        // create a completely new OOFF mandate
+        CRM_Sepapp_Configuration::log("Creating full OOFF mandate", CRM_Sepapp_Configuration::LOG_LEVEL_ERROR);
+        $mandate = civicrm_api3('SepaMandate', 'createfull', [
+            'creditor_id'        => $creditor['id'],
+            'amount'             => $params['amount'],
+            'type'               => 'OOFF',
+            'iban'               => $params['iban'],
+            'bic'                => $params['bic'],
+            'contact_id'         => $this->getContactId($params),
+            // 'campaign_id'     => CRM_Utils_Array::value('campaign_id', $contribution),
+            'currency'           => CRM_Utils_Array::value('currency', $creditor, 'EUR'),
+            'financial_type_id'  => $this->getFinancialTypeId($params),
+            'date'               => date('YmdHis'),
+            'creation_date'      => date('YmdHis'),
+            'validation_date'    => date('YmdHis'),
+            'source'             => CRM_Utils_Array::value('description', $params, ''),
+        ]);
+        CRM_Sepapp_Configuration::log("Full OOFF mandate [{$mandate['id']}] created.", CRM_Sepapp_Configuration::LOG_LEVEL_AUDIT);
+      }
 
     } else {
       // RCUR Mandate
@@ -175,9 +195,13 @@ class CRM_Core_Payment_SDDNG extends CRM_Core_Payment {
         ]);
         CRM_Sepapp_Configuration::log("RCUR mandate [{$mandate['id']}] created and linked.", CRM_Sepapp_Configuration::LOG_LEVEL_AUDIT);
 
+        // reset recurring contribution
+        $this->updateRecurringContribution($params, $creditor['id']);
+        CRM_Sepapp_Configuration::log("Recurring contribution [{$params['contributionRecurID']}] adjusted.", CRM_Sepapp_Configuration::LOG_LEVEL_AUDIT);
+
 
       } else {
-        // create a completely new mandate
+        // create a completely new RCUR mandate
         $mandate = civicrm_api3('SepaMandate', 'createfull', [
             'creditor_id'        => $creditor['id'],
             'amount'             => $params['amount'],
@@ -187,20 +211,17 @@ class CRM_Core_Payment_SDDNG extends CRM_Core_Payment {
             'contact_id'         => $this->getContactId($params),
             // 'campaign_id'     => CRM_Utils_Array::value('campaign_id', $contribution),
             'currency'           => CRM_Utils_Array::value('currency', $creditor, 'EUR'),
+            'start_date'         => $this->getNextPossibleCollectionDate($creditor['id']),
             'frequency_unit'     => $params['frequency_unit'],
             'frequency_interval' => $params['frequency_interval'],
-            'financial_type_id'  => $params['financial_type_id'],
+            'financial_type_id'  => $this->getFinancialTypeId($params),
             'date'               => date('YmdHis'),
             'creation_date'      => date('YmdHis'),
             'validation_date'    => date('YmdHis'),
             'source'             => CRM_Utils_Array::value('description', $params, ''),
         ]);
+        CRM_Sepapp_Configuration::log("Full RCUR mandate [{$mandate['id']}] created.", CRM_Sepapp_Configuration::LOG_LEVEL_AUDIT);
       }
-      CRM_Sepapp_Configuration::log("RCUR mandate [{$mandate['id']}] created.", CRM_Sepapp_Configuration::LOG_LEVEL_AUDIT);
-
-      // reset recurring contribution
-      $this->updateRecurringContribution($params, $creditor['id']);
-      CRM_Sepapp_Configuration::log("Recurring contribution [{$params['contributionRecurID']}] adjusted.", CRM_Sepapp_Configuration::LOG_LEVEL_AUDIT);
 
       // finally: delete contribution
       $contribution_id = $this->getContributionId($params);

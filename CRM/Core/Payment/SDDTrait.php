@@ -87,6 +87,34 @@ trait CRM_Core_Payment_SDDTrait {
   }
 
   /**
+   * Get the financial type ID
+   *
+   * @param $params
+   *
+   * @return mixed
+   */
+  protected function getFinancialTypeId($params) {
+    // check financial_type_id
+    if (!empty($params['financial_type_id'])) {
+      return $params['financial_type_id'];
+    }
+
+    // check financialTypeID
+    if (!empty($params['financialTypeID'])) {
+      return $params['financialTypeID'];
+    }
+
+    // fallback: use any
+    $financial_type = civicrm_api3('FinancialType', 'get', [
+        'is_active'    => 1,
+        'option.limit' => 1,
+        'return'       => 'id'
+    ]);
+
+    return $financial_type['id'];
+  }
+
+  /**
    * Get the recurring contribution ID from parameters passed in to cancelSubscription
    * Historical the data passed to cancelSubscription is pretty poor and doesn't include much!
    *
