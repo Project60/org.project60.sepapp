@@ -202,10 +202,7 @@ function sepapp_civicrm_buildForm ( $formName, &$form ) {
  * (old approach)
  */
 function sepapp_civicrm_postProcess( $formName, &$form ) {
-  // SDD: make sure mandate is created:
-  CRM_Core_Payment_SDDNGPostProcessor::createPendingMandate();
-
-  // also: check payment processor
+  // check payment processor
   if ("CRM_Admin_Form_PaymentProcessor" == $formName) {
     $pp_id = $form->getVar('_id');
     if ($pp_id) {
@@ -357,18 +354,6 @@ function sepapp_civicrm_disable() {
     }
   }
 }
-
-/**
- * Implements hook_civicrm_apiWrappers to prevent people from deleting
- *   contributions connected to SDD mandates.
- */
-function sepapp_civicrm_apiWrappers(&$wrappers, $apiRequest) {
-  // add a wrapper for the payment processor
-  if ($apiRequest['entity'] == 'Contribution' && $apiRequest['action'] == 'completetransaction') {
-    $wrappers[] = new CRM_Core_Payment_SDDNGPostProcessor();
-  }
-}
-
 
 /**
  * Implements hook_civicrm_config().
