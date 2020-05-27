@@ -1,30 +1,30 @@
 <?xml version="1.0"?>
 <extension key="org.project60.sepapp" type="module">
-  <file>sepapp</file>
-  <name>CiviSEPA Payment Processor</name>
-  <description>Provides a CiviCRM payment processor for the CiviSEPA extension</description>
-  <license>AGPL-3.0</license>
-  <maintainer>
-    <author>B. Endres</author>
-    <email>endres@systopia.de</email>
-  </maintainer>
-  <urls>
-    <url desc="Main Extension Page">https://github.com/Project60/org.project60.sepapp</url>
-    <url desc="Documentation">https://github.com/Project60/org.project60.sepapp</url>
-    <url desc="Support">https://github.com/Project60/org.project60.sepapp/issues</url>
-    <url desc="Licensing">http://www.gnu.org/licenses/agpl-3.0.html</url>
-  </urls>
-  <releaseDate></releaseDate>
-  <version>0.1</version>
-  <develStage>dev</develStage>
-  <requires>
-    <ext>org.project60.sepa</ext>
-  </requires>
-  <compatibility>
-    <ver>5.0</ver>
-  </compatibility>
-  <comments>This used to be part of CiviSEPA</comments>
-  <civix>
-    <namespace>CRM/sepapp</namespace>
-  </civix>
+    <file>sepapp</file>
+    <name>CiviSEPA Payment Processor</name>
+    <description>Provides a CiviCRM payment processor for the CiviSEPA extension</description>
+    <license>AGPL-3.0</license>
+    <maintainer>
+        <author>B. Endres</author>
+        <email>endres@systopia.de</email>
+    </maintainer>
+    <urls>
+        <url desc="Main Extension Page">https://github.com/Project60/org.project60.sepapp</url>
+        <url desc="Documentation">https://github.com/Project60/org.project60.sepapp</url>
+        <url desc="Support">https://github.com/Project60/org.project60.sepapp/issues</url>
+        <url desc="Licensing">http://www.gnu.org/licenses/agpl-3.0.html</url>
+    </urls>
+    <releaseDate></releaseDate>
+    <version>1.0-dev</version>
+    <develStage>dev</develStage>
+    <requires>
+        <ext version=">=1.5">org.project60.sepa</ext>
+    </requires>
+    <compatibility>
+        <ver>5.0</ver>
+    </compatibility>
+    <comments>This used to be part of CiviSEPA</comments>
+    <civix>
+        <namespace>CRM/Sepapp</namespace>
+    </civix>
 </extension>
