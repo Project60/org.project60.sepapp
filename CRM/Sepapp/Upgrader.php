@@ -21,130 +21,172 @@ use CRM_Sepapp_ExtensionUtil as E;
  */
 class CRM_Sepapp_Upgrader extends CRM_Sepapp_Upgrader_Base
 {
-
-    // By convention, functions that look like "function upgrade_NNNN()" are
-    // upgrade tasks. They are executed in order (like Drupal's hook_update_N).
+    /**
+     * Module is enabled
+     */
+    public function enable()
+    {
+        // check if any payment processors need to be revived
+        $this->revivedSDDPaymentProcessors();
+    }
 
     /**
-     * Example: Run an external SQL script when the module is installed.
-     *
-     * public function install() {
-     * $this->executeSqlFile('sql/myinstall.sql');
-     * }
-     *
-     * /**
-     * Example: Work with entities usually not available during the install step.
-     *
-     * This method can be used for any post-install tasks. For example, if a step
-     * of your installation depends on accessing an entity that is itself
-     * created during the installation (e.g., a setting or a managed entity), do
-     * so here to avoid order of operation problems.
-     *
-     * public function postInstall() {
-     * $customFieldId = civicrm_api3('CustomField', 'getvalue', array(
-     * 'return' => array("id"),
-     * 'name' => "customFieldCreatedViaManagedHook",
-     * ));
-     * civicrm_api3('Setting', 'create', array(
-     * 'myWeirdFieldSetting' => array('id' => $customFieldId, 'weirdness' => 1),
-     * ));
-     * }
-     *
-     * /**
-     * Example: Run an external SQL script when the module is uninstalled.
-     *
-     * public function uninstall() {
-     * $this->executeSqlFile('sql/myuninstall.sql');
-     * }
-     *
-     * /**
-     * Example: Run a simple query when a module is enabled.
-     *
-     * public function enable() {
-     * CRM_Core_DAO::executeQuery('UPDATE foo SET is_active = 1 WHERE bar = "whiz"');
-     * }
-     *
-     * /**
-     * Example: Run a simple query when a module is disabled.
-     *
-     * public function disable() {
-     * CRM_Core_DAO::executeQuery('UPDATE foo SET is_active = 0 WHERE bar = "whiz"');
-     * }
-     *
-     * /**
-     * Example: Run a couple simple queries.
-     *
-     * @return TRUE on success
-     * @throws Exception
-     *
-     * public function upgrade_4200() {
-     * $this->ctx->log->info('Applying update 4200');
-     * CRM_Core_DAO::executeQuery('UPDATE foo SET bar = "whiz"');
-     * CRM_Core_DAO::executeQuery('DELETE FROM bang WHERE willy = wonka(2)');
-     * return TRUE;
-     * } // */
-
+     * Module is disabled
+     */
+    public function disable()
+    {
+        // check if any payment processors need to be revived
+        $this->suspendSDDPaymentProcessors();
+    }
 
     /**
-     * Example: Run an external SQL script.
-     *
-     * @return TRUE on success
-     * @throws Exception
-     * public function upgrade_4201() {
-     * $this->ctx->log->info('Applying update 4201');
-     * // this path is relative to the extension base dir
-     * $this->executeSqlFile('sql/upgrade_4201.sql');
-     * return TRUE;
-     * } // */
+     * Try to revive SDD payment processors, that have been suspended,
+     *  e.g. by an upgrade of CiviSEPA version >= 1.5
+     */
+    protected function revivedSDDPaymentProcessors()
+    {
+        // INSTALL OLD PROCESSOR
+        $sdd_pp_type_ids = [];
+        $sdd_pp          = civicrm_api3('PaymentProcessorType', 'get', array('name' => PP_SDD_PROCESSOR_TYPE));
+        if (empty($sdd_pp['id'])) {
+            // doesn't exist yet => create
+            $payment_processor_data         = array(
+                "name"                   => "SEPA_Direct_Debit",
+                "title"                  => E::ts("SEPA Direct Debit"),
+                "description"            => E::ts("Payment processor for the 'Single European Payment Area' (SEPA)."),
+                "is_active"              => 1,
+                "user_name_label"        => "SEPA Creditor identifier",
+                "class_name"             => "Payment_SDD",
+                "url_site_default"       => "",
+                "url_recur_default"      => "",
+                "url_site_test_default"  => "",
+                "url_recur_test_default" => "",
+                "billing_mode"           => "1",
+                "is_recur"               => "1",
+                "payment_type"           => CRM_Core_Payment::PAYMENT_TYPE_DIRECT_DEBIT
+            );
+            $result                         = civicrm_api3('PaymentProcessorType', 'create', $payment_processor_data);
+            $sdd_pp_type_ids[$result['id']] = 'Payment_SDD';
+            CRM_Sepapp_Configuration::log(
+                "org.project60.sepa_dd: created payment processor with name PP_SDD_PROCESSOR_TYPE"
+            );
+        } else {
+            // already exists => enable if not enabled
+            $sdd_pp_type_ids[$sdd_pp['id']] = 'Payment_SDD';
+            if (empty($sdd_pp['is_active'])) {
+                $result = civicrm_api3(
+                    'PaymentProcessorType',
+                    'create',
+                    array(
+                        'id'        => $sdd_pp['id'],
+                        'is_active' => 1
+                    )
+                );
+            }
+        }
 
+        // INSTALL NEW/NG PROCESSOR
+        $sdd_pp_ng = civicrm_api3('PaymentProcessorType', 'get', array('name' => PP_SDD_PROCESSOR_TYPE_NEW));
+        if (empty($sdd_pp_ng['id'])) {
+            // doesn't exist yet => create
+            $payment_processor_data         = array(
+                "name"                   => PP_SDD_PROCESSOR_TYPE_NEW,
+                "title"                  => E::ts("SEPA Direct Debit (NEW)"),
+                "description"            => E::ts(
+                    "Refactored Payment processor for the 'Single European Payement Area' (SEPA)."
+                ),
+                "is_active"              => 1,
+                "user_name_label"        => "SEPA Creditor identifier",
+                "class_name"             => "Payment_SDDNG",
+                "url_site_default"       => "",
+                "url_recur_default"      => "",
+                "url_site_test_default"  => "",
+                "url_recur_test_default" => "",
+                "billing_mode"           => "1",
+                "is_recur"               => "1",
+                "payment_type"           => CRM_Core_Payment::PAYMENT_TYPE_DIRECT_DEBIT
+            );
+            $result                         = civicrm_api3('PaymentProcessorType', 'create', $payment_processor_data);
+            $sdd_pp_type_ids[$result['id']] = 'Payment_SDDNG';
+            CRM_Sepapp_Configuration::log(
+                "org.project60.sepa_dd: created payment processor with name 'SEPA_Direct_Debit_NG'"
+            );
+        } else {
+            // already exists => enable if not enabled
+            $sdd_pp_type_ids[$sdd_pp_ng['id']] = 'Payment_SDDNG';
+            if (empty($sdd_pp_ng['is_active'])) {
+                $result = civicrm_api3(
+                    'PaymentProcessorType',
+                    'create',
+                    array(
+                        'id'        => $sdd_pp_ng['id'],
+                        'is_active' => 1
+                    )
+                );
+            }
+        }
+
+        // restore dummy instances
+        if (!empty($sdd_pp_type_ids)) {
+            $sdd_pps = civicrm_api3(
+                'PaymentProcessor',
+                'get',
+                [
+                    'payment_processor_type_id' => ['IN' => array_keys($sdd_pp_type_ids)],
+                    'class_name'                => 'Payment_Dummy'
+                ]
+            );
+            foreach ($sdd_pps['values'] as $sdd_pp) {
+                civicrm_api3(
+                    'PaymentProcessor',
+                    'create',
+                    [
+                        'id'         => $sdd_pp['id'],
+                        'class_name' => $sdd_pp_type_ids[$sdd_pp['payment_processor_type_id']]
+                    ]
+                );
+            }
+        }
+    }
 
     /**
-     * Example: Run a slow upgrade process by breaking it up into smaller chunk.
-     *
-     * @return TRUE on success
-     * @throws Exception
-     * public function upgrade_4202() {
-     * $this->ctx->log->info('Planning update 4202'); // PEAR Log interface
-     *
-     * $this->addTask(E::ts('Process first step'), 'processPart1', $arg1, $arg2);
-     * $this->addTask(E::ts('Process second step'), 'processPart2', $arg3, $arg4);
-     * $this->addTask(E::ts('Process second step'), 'processPart3', $arg5);
-     * return TRUE;
-     * }
-     * public function processPart1($arg1, $arg2) { sleep(10); return TRUE; }
-     * public function processPart2($arg3, $arg4) { sleep(10); return TRUE; }
-     * public function processPart3($arg5) { sleep(10); return TRUE; }
-     * // */
+     * Suspend payment processors, as the implementation code is
+     *   no longer available
+     */
+    protected function suspendSDDPaymentProcessors()
+    {
+        // get the IDs of the SDD processor types
+        $sdd_processor_type_ids = [];
+        $sdd_processor_type_query = civicrm_api3('PaymentProcessorType', 'get', [
+            'name'         => ['IN' => ['SEPA_Direct_Debit', 'SEPA_Direct_Debit_NG']],
+            'return'       => 'id',
+            'option.limit' => 0,
+        ]);
+        foreach ($sdd_processor_type_query['values'] as $pp_type) {
+            $sdd_processor_type_ids[] = (int) $pp_type['id'];
+        }
 
+        // if there is SDD types registered (which should be the case), we have to deal with them
+        if (!empty($sdd_processor_type_ids)) {
+            // find out, if they're being used
+            $sdd_processor_type_id_list = implode(',', $sdd_processor_type_ids);
+            $use_count = CRM_Core_DAO::singleValueQuery("SELECT COUNT(id) FROM civicrm_payment_processor WHERE payment_processor_type_id IN ({$sdd_processor_type_id_list});");
 
-    /**
-     * Example: Run an upgrade with a query that touches many (potentially
-     * millions) of records by breaking it up into smaller chunks.
-     *
-     * @return TRUE on success
-     * @throws Exception
-     * public function upgrade_4203() {
-     * $this->ctx->log->info('Planning update 4203'); // PEAR Log interface
-     *
-     * $minId = CRM_Core_DAO::singleValueQuery('SELECT coalesce(min(id),0) FROM civicrm_contribution');
-     * $maxId = CRM_Core_DAO::singleValueQuery('SELECT coalesce(max(id),0) FROM civicrm_contribution');
-     * for ($startId = $minId; $startId <= $maxId; $startId += self::BATCH_SIZE) {
-     * $endId = $startId + self::BATCH_SIZE - 1;
-     * $title = E::ts('Upgrade Batch (%1 => %2)', array(
-     * 1 => $startId,
-     * 2 => $endId,
-     * ));
-     * $sql = '
-     * UPDATE civicrm_contribution SET foobar = whiz(wonky()+wanker)
-     * WHERE id BETWEEN %1 and %2
-     * ';
-     * $params = array(
-     * 1 => array($startId, 'Integer'),
-     * 2 => array($endId, 'Integer'),
-     * );
-     * $this->addTask($title, 'executeSql', $sql, $params);
-     * }
-     * return TRUE;
-     * } // */
+            if ($use_count) {
+                // if the payment processors are being used, divert them to the dummy processor
+                //  and issue a warning to install the SDD PP extension
+                $message = E::ts("Your CiviSEPA payment processors have been disabled, the code was moved into a new extension. If you want to continue using your CiviSEPA payment processors, please install the latest version of the <a href=\"https://github.com/Project60/org.project60.sepapp/releases\">CiviSEPA Payment Processor</a> Extension.");
+                CRM_Core_DAO::executeQuery("UPDATE civicrm_payment_processor SET class_name='Payment_Dummy' WHERE payment_processor_type_id IN ({$sdd_processor_type_id_list});");
+                CRM_Core_Session::setStatus($message, E::ts("%1 Payment Processor(s) Disabled!", [1 => $use_count]), 'warn');
+                CRM_Sepapp_Configuration::log($message, CRM_Sepapp_Configuration::LOG_LEVEL_INFO);
+
+            } else {
+                // if they are _not_ used, we can simply delete them.
+                foreach ($sdd_processor_type_ids as $sdd_processor_type_id) {
+                    civicrm_api3('PaymentProcessorType', 'delete', ['id' => $sdd_processor_type_id]);
+                }
+            }
+        }
+    }
 
 }
