@@ -1,44 +1,9 @@
-# org.project60.sepapp
+# CiviSEPA Payment Processors
 
-![Screenshot](/images/screenshot.png)
+This CiviCRM extension contains two payment processors for the [CiviSEPA extension](https://github.com/Project60/org.project60.sepa).
 
-(*FIXME: In one or two paragraphs, describe what the extension does and why one would download it. *)
+They were originally part of CiviSEPA, but they seem to be more volatile and need more tweaking depending on your CiviCRM version and your payment processor setup.
 
-The extension is licensed under [AGPL-3.0](LICENSE.txt).
+In order to facilitate faster development cycles, these payment processors can now be developed and versioned independently from CiviSEPA.
 
-## Requirements
-
-* PHP v5.4+
-* CiviCRM (*FIXME: Version number*)
-
-## Installation (Web UI)
-
-This extension has not yet been published for installation via the web UI.
-
-## Installation (CLI, Zip)
-
-Sysadmins and developers may download the `.zip` file for this extension and
-install it with the command-line tool [cv](https://github.com/civicrm/cv).
-
-```bash
-cd <extension-dir>
-cv dl org.project60.sepapp@https://github.com/FIXME/org.project60.sepapp/archive/master.zip
-```
-
-## Installation (CLI, Git)
-
-Sysadmins and developers may clone the [Git](https://en.wikipedia.org/wiki/Git) repo for this extension and
-install it with the command-line tool [cv](https://github.com/civicrm/cv).
-
-```bash
-git clone https://github.com/FIXME/org.project60.sepapp.git
-cv en sepapp
-```
-
-## Usage
-
-(* FIXME: Where would a new user navigate to get started? What changes would they see? *)
-
-## Known Issues
-
-(* FIXME *)
+Feel free to fork and add your own tweaks!
