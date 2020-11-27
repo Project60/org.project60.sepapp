@@ -1,0 +1,112 @@
+# Copyright CiviCRM LLC (c) 2004-2015
+# This file is distributed under the same license as the CiviCRM package.
+# If you contribute heavily to a translation and deem your work copyrightable,
+# make sure you license it to CiviCRM LLC under Academic Free License 3.0.
+msgid ""
+msgstr ""
+"Project-Id-Version: org.project60.sepapp\n"
+"POT-Creation-Date: 2020-11-27 19:34+0100\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: CiviCRM Translators <civicrm-translators@lists.civicrm.org>\n"
+"Language: de_DE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.0.6\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: CRM/Core/Payment/SDD.php CRM/Sepapp/Upgrader.php
+msgid "SEPA Direct Debit"
+msgstr "SEPA Direct Debit"
+
+#: CRM/Core/Payment/SDD.php
+msgid "Couldn't create SEPA mandate. Error was: "
+msgstr "SEPA Mandat konnte nicht erstellt werden: "
+
+#: CRM/Core/Payment/SDD.php CRM/Core/Payment/SDDNG.php
+msgid "Account Holder"
+msgstr "Kontoinhaber"
+
+#: CRM/Core/Payment/SDD.php CRM/Core/Payment/SDDNG.php
+msgid "IBAN"
+msgstr "IBAN"
+
+#: CRM/Core/Payment/SDD.php CRM/Core/Payment/SDDNG.php
+msgid "This is not a correct IBAN."
+msgstr "Das ist keine zulässige IBAN."
+
+#: CRM/Core/Payment/SDD.php CRM/Core/Payment/SDDNG.php
+msgid "BIC"
+msgstr "BIC"
+
+#: CRM/Core/Payment/SDD.php CRM/Core/Payment/SDDNG.php
+msgid "This is not a correct BIC."
+msgstr "Das ist keine zulässige BIC."
+
+#: CRM/Core/Payment/SDD.php CRM/Core/Payment/SDDNG.php
+msgid "Bank Name"
+msgstr "Name der Bank"
+
+#: CRM/Core/Payment/SDD.php CRM/Core/Payment/SDDNG.php
+msgid "Collection Day"
+msgstr "Einzugstag"
+
+#: CRM/Core/Payment/SDD.php CRM/Core/Payment/SDDNG.php
+msgid "Start Date"
+msgstr "Einzugsbeginn"
+
+#: CRM/Core/Payment/SDDNG.php
+msgid "Direct Debit"
+msgstr "Direct Debit"
+
+#: CRM/Sepapp/Upgrader/Base.php
+msgid "Upgrade %1 to revision %2"
+msgstr ""
+
+#: CRM/Sepapp/Upgrader.php
+msgid "Payment processor for the 'Single European Payment Area' (SEPA)."
+msgstr "Zahlungsprozessor für SEPA Einzüge."
+
+#: CRM/Sepapp/Upgrader.php
+msgid "SEPA Direct Debit (NEW)"
+msgstr "SEPA Direct Debit (NEU)"
+
+#: CRM/Sepapp/Upgrader.php
+msgid ""
+"Refactored Payment processor for the 'Single European Payement Area' (SEPA)."
+msgstr "Überarbeiteter Zahlungsprozessor für SEPA Einzüge."
+
+#: CRM/Sepapp/Upgrader.php
+msgid "Your CiviSEPA payment processors have been disabled."
+msgstr "Ihre CiviSEPA Zahlungsprozessoren wurde deaktiviert!"
+
+#: CRM/Sepapp/Upgrader.php
+msgid "%1 Payment Processor(s) Disabled!"
+msgstr "%1 Zahlungsprozessor(en) wurden deaktiviert!"
+
+#: templates/CRM/Admin/Form/PaymentProcessor/SDD.hlp
+msgid "Select the creditor, that should be used for this payment processor."
+msgstr ""
+"Wählen sie den SEPA Kreditor, der für diesen Zahlungsprozessor verwendet "
+"werden soll."
+
+#: templates/CRM/Admin/Form/PaymentProcessor/SDD.hlp
+msgid ""
+"The creditor object not only determines the creditor ID, but also the "
+"account and the SEPA file format to be used."
+msgstr ""
+"Der SEPA Kreditor bestimmt nicht nur die Kreidtor-ID, sondern auch das Konto "
+"auf das eingezogen wird, sowie das zum Einzug verwendete Dateiformat."
+
+#: templates/CRM/Admin/Form/PaymentProcessor/SDD.tpl
+msgid "Creditor"
+msgstr "Kreditor"
+
+#: templates/CRM/Admin/Form/PaymentProcessor/SDD.tpl
+msgid "Help"
+msgstr "Hilfe"
+
+#: templates/CRM/Core/Payment/SEPA/SDD.tpl
+msgid "Bank unknown, please enter BIC."
+msgstr "Unbekannte Bank, bitte BIC angeben."

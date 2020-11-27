@@ -175,7 +175,7 @@ class CRM_Sepapp_Upgrader extends CRM_Sepapp_Upgrader_Base
             if ($use_count) {
                 // if the payment processors are being used, divert them to the dummy processor
                 //  and issue a warning to install the SDD PP extension
-                $message = E::ts("Your CiviSEPA payment processors have been disabled, the code was moved into a new extension. If you want to continue using your CiviSEPA payment processors, please install the latest version of the <a href=\"https://github.com/Project60/org.project60.sepapp/releases\">CiviSEPA Payment Processor</a> Extension.");
+                $message = E::ts("Your CiviSEPA payment processors have been disabled.");
                 CRM_Core_DAO::executeQuery("UPDATE civicrm_payment_processor SET class_name='Payment_Dummy' WHERE payment_processor_type_id IN ({$sdd_processor_type_id_list});");
                 CRM_Core_Session::setStatus($message, E::ts("%1 Payment Processor(s) Disabled!", [1 => $use_count]), 'warn');
                 CRM_Sepapp_Configuration::log($message, CRM_Sepapp_Configuration::LOG_LEVEL_INFO);
