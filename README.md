@@ -6,4 +6,8 @@ They were originally part of CiviSEPA, but they seem to be more volatile and nee
 
 In order to facilitate faster development cycles, these payment processors can now be developed and versioned independently from CiviSEPA.
 
-Feel free to fork and add your own tweaks!
+The module currently provides two SEPA payment processors:
+* ``SDD`` is the original payment processor implementation
+* ``SDDNG`` is the 'next generation' processor, that was created to support membership and event payments.
+
+However, both of them still might or might not work depending on your setup. Please test well before using productively.
