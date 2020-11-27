@@ -24,6 +24,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
 {
     protected $_mode = null;
     protected $_params = array();
+    protected $_paymentForm = null;
     static private $_singleton = null;
 
     /**
