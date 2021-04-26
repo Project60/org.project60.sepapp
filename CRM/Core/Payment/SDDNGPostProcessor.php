@@ -128,7 +128,7 @@ class CRM_Core_Payment_SDDNGPostProcessor implements API_Wrapper
                     'date'            => date('YmdHis'),
                     'creation_date'   => date('YmdHis'),
                     'validation_date' => date('YmdHis'),
-                    'source'          => $contribution['contribution_source'],
+                    'source'          => substr($contribution['contribution_source'], 0, 64),
                 )
             );
             CRM_Sepapp_Configuration::log(
@@ -171,7 +171,7 @@ class CRM_Core_Payment_SDDNGPostProcessor implements API_Wrapper
                     'date'            => date('YmdHis'),
                     'creation_date'   => date('YmdHis'),
                     'validation_date' => date('YmdHis'),
-                    'source'          => $contribution['contribution_source'],
+                    'source'          => substr($contribution['contribution_source'], 0, 64),
                 )
             );
             CRM_Sepapp_Configuration::log(
