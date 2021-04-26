@@ -303,6 +303,7 @@ class CRM_Core_Payment_SDDNGPostProcessor implements API_Wrapper
                     'contribution_status_id' => $status_pending,
                     'payment_instrument_id'  => $payment_instrument_id,
                     'start_date'             => $start_date,
+                    'cycle_day'              => date('j', strtotime($start_date)),
                     'end_date'               => $end_date
                 )
             );
