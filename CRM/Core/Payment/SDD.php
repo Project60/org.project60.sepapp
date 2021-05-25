@@ -23,9 +23,7 @@
 class CRM_Core_Payment_SDD extends CRM_Core_Payment
 {
     protected $_mode = null;
-    protected $_params = array();
     protected $_paymentForm = null;
-    static private $_singleton = null;
 
     /**
      * Constructor
@@ -34,7 +32,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
      *
      * @return void
      */
-    function __construct($mode, &$paymentProcessor)
+    public function __construct($mode, &$paymentProcessor)
     {
         $this->_mode             = $mode;
         $this->_paymentProcessor = $paymentProcessor;
@@ -63,26 +61,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
         }
     }
 
-    /**
-     * singleton function used to manage this object
-     *
-     * @param string $mode the mode of operation: live or test
-     *
-     * @return object
-     * @static
-     *
-     */
-    static function &singleton($mode, &$paymentProcessor, &$paymentForm = null, $force = false)
-    {
-        $processorName = $paymentProcessor['name'];
-        if (CRM_Utils_Array::value($processorName, self::$_singleton) === null) {
-            self::$_singleton[$processorName] = new CRM_Core_Payment_SDD($mode, $paymentProcessor);
-        }
-        return self::$_singleton[$processorName];
-    }
-
-
-    function buildForm(&$form)
+    public function buildForm(&$form)
     {
         // add rules
         if ($this->_creditor['creditor_type'] == 'SEPA') {
@@ -130,9 +109,8 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
      * This function checks to see if we have the right config values
      *
      * @return string the error message if any
-     * @public
      */
-    function checkConfig()
+    public function checkConfig()
     {
         // TODO: check urls (creditor IDs)
         // don't check frequencies any more (SEPA-452)
@@ -150,7 +128,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
      *
      * @return array the result in an nice formatted array (or an error object)
      */
-    function doDirectPayment(&$params)
+    public function doDirectPayment(&$params)
     {
         $original_parameters = $params;
 
@@ -244,7 +222,6 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
 
         return $params;
     }
-
 
     /**
      * This is the counterpart to the doDirectPayment method. This method creates
@@ -430,9 +407,6 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
             }
         }
     }
-
-
-
 
     /***********************************************
      *            CiviCRM >= 4.6.10                *

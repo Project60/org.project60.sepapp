@@ -32,7 +32,6 @@ class CRM_Core_Payment_SDDNG extends CRM_Core_Payment
     /** Caches the creditor involved */
     protected $_creditor = null;
 
-
     /**
      * Override CRM_Core_Payment function
      */
@@ -249,7 +248,7 @@ class CRM_Core_Payment_SDDNG extends CRM_Core_Payment
      *            Form-building duty               *
      ***********************************************/
 
-    function buildForm(&$form)
+    public function buildForm(&$form)
     {
         // add rules
         $form->registerRule('sepa_iban_valid', 'callback', 'rule_valid_IBAN', 'CRM_Sepa_Logic_Verification');
