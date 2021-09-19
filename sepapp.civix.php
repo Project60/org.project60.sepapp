@@ -257,7 +257,7 @@ function _sepapp_civix_find_files($dir, $pattern)
         if ($dh = opendir($subdir)) {
             while (false !== ($entry = readdir($dh))) {
                 $path = $subdir . DIRECTORY_SEPARATOR . $entry;
-                if ($entry{0} == '.') {
+                if ($entry[0] == '.') {
                 } elseif (is_dir($path)) {
                     $todos[] = $path;
                 }
