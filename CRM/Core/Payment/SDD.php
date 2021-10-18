@@ -137,7 +137,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
     {
         // TODO: check urls (creditor IDs)
         // don't check frequencies any more (SEPA-452)
-        // CRM_Utils_SepaOptionGroupTools::checkRecurringFrequencyUniE::ts(TRUE, TRUE);
+        // CRM_Utils_SepaOptionGroupTools::checkRecurringFrequencyUnits(TRUE, TRUE);
         return null;
     }
 
