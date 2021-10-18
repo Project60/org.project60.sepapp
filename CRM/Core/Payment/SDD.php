@@ -14,6 +14,7 @@
 | written permission from the original author(s).        |
 +--------------------------------------------------------*/
 
+use CRM_Sepa_ExtensionUtil as E;
 
 /**
  * SEPA_Direct_Debit payment processor
@@ -38,7 +39,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
     {
         $this->_mode             = $mode;
         $this->_paymentProcessor = $paymentProcessor;
-        $this->_processorName    = ts('SEPA Direct Debit', array('domain' => 'org.project60.sepa'));
+        $this->_processorName    = E::ts('SEPA Direct Debit');
         $this->_creditorId       = $paymentProcessor['user_name'];
         try {
             $this->_creditor = civicrm_api3('SepaCreditor', 'getsingle', array('id' => $this->_creditorId));
@@ -136,7 +137,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
     {
         // TODO: check urls (creditor IDs)
         // don't check frequencies any more (SEPA-452)
-        // CRM_Utils_SepaOptionGroupTools::checkRecurringFrequencyUnits(TRUE, TRUE);
+        // CRM_Utils_SepaOptionGroupTools::checkRecurringFrequencyUniE::ts(TRUE, TRUE);
         return null;
     }
 
@@ -200,7 +201,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
         $mandate           = civicrm_api('SepaMandate', 'create', $params);
         if (!empty($mandate['is_error'])) {
             return CRM_Core_Error::createError(
-                ts(
+                E::ts(
                     "Couldn't create SEPA mandate. Error was: ",
                     array('domain' => 'org.project60.sepa')
                 ) . $mandate['error_message']
@@ -451,7 +452,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
      */
     public function getPaymentTypeLabel()
     {
-        return ts('Direct Debit');
+        return E::ts('Direct Debit');
     }
 
     /**
@@ -518,7 +519,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
                 'account_holder'             => array(
                     'htmlType'    => 'text',
                     'name'        => 'account_holder',
-                    'title'       => ts('Account Holder', array('domain' => 'org.project60.sepa')),
+                    'title'       => E::ts('Account Holder'),
                     'cc_field'    => true,
                     'attributes'  => array(
                         'size'         => 20,
@@ -531,7 +532,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
                 'bank_account_number'        => array(
                     'htmlType'    => 'text',
                     'name'        => 'bank_account_number',
-                    'title'       => ts('IBAN', array('domain' => 'org.project60.sepa')),
+                    'title'       => E::ts('IBAN'),
                     'cc_field'    => true,
                     'attributes'  => array(
                         'size'         => 34,
@@ -540,7 +541,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
                     ),
                     'rules'       => array(
                         array(
-                            'rule_message'    => ts(
+                            'rule_message'    => E::ts(
                                 'This is not a correct IBAN.',
                                 array('domain' => 'org.project60.sepa')
                             ),
@@ -554,7 +555,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
                 'bank_identification_number' => array(
                     'htmlType'    => 'text',
                     'name'        => 'bank_identification_number',
-                    'title'       => ts('BIC', array('domain' => 'org.project60.sepa')),
+                    'title'       => E::ts('BIC'),
                     'cc_field'    => true,
                     'attributes'  => array(
                         'size'         => 20,
@@ -564,7 +565,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
                     'is_required' => true,
                     'rules'       => array(
                         array(
-                            'rule_message'    => ts(
+                            'rule_message'    => E::ts(
                                 'This is not a correct BIC.',
                                 array('domain' => 'org.project60.sepa')
                             ),
@@ -576,7 +577,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
                 'bank_name'                  => array(
                     'htmlType'    => 'text',
                     'name'        => 'bank_name',
-                    'title'       => ts('Bank Name', array('domain' => 'org.project60.sepa')),
+                    'title'       => E::ts('Bank Name'),
                     'cc_field'    => true,
                     'attributes'  => array(
                         'size'         => 34,
@@ -588,7 +589,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
                 'cycle_day'                  => array(
                     'htmlType'    => 'select',
                     'name'        => 'cycle_day',
-                    'title'       => ts('Collection Day', array('domain' => 'org.project60.sepa')),
+                    'title'       => E::ts('Collection Day'),
                     'cc_field'    => true,
                     'attributes'  => CRM_Sepa_Logic_Settings::getListSetting(
                         "cycledays",
@@ -600,7 +601,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
                 'start_date'                 => array(
                     'htmlType'    => 'text',
                     'name'        => 'start_date',
-                    'title'       => ts('Start Date', array('domain' => 'org.project60.sepa')),
+                    'title'       => E::ts('Start Date'),
                     'cc_field'    => true,
                     'attributes'  => array(),
                     'is_required' => true,
@@ -622,7 +623,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
         $form->add(
             'text',
             'bank_account_number',
-            ts('IBAN', array('domain' => 'org.project60.sepa')),
+            E::ts('IBAN'),
             array('size' => 34, 'maxlength' => 34,),
             true
         );
@@ -630,7 +631,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
         $form->add(
             'text',
             'bank_identification_number',
-            ts('BIC', array('domain' => 'org.project60.sepa')),
+            E::ts('BIC'),
             array('size' => 11, 'maxlength' => 11),
             true
         );
@@ -638,7 +639,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
         $form->add(
             'text',
             'bank_name',
-            ts('Bank Name', array('domain' => 'org.project60.sepa')),
+            E::ts('Bank Name'),
             array('size' => 20, 'maxlength' => 64),
             false
         );
@@ -646,7 +647,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
         $form->add(
             'text',
             'account_holder',
-            ts('Account Holder', array('domain' => 'org.project60.sepa')),
+            E::ts('Account Holder'),
             array('size' => 20, 'maxlength' => 64),
             false
         );
@@ -654,14 +655,14 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
         $form->add(
             'select',
             'cycle_day',
-            ts('Collection Day', array('domain' => 'org.project60.sepa')),
+            E::ts('Collection Day'),
             CRM_Sepa_Logic_Settings::getListSetting("cycledays", range(1, 28), $this->_creditorId),
             false
         );
 
         $form->addDate(
             'start_date',
-            ts('Start Date', array('domain' => 'org.project60.sepa')),
+            E::ts('Start Date'),
             true,
             array()
         );
@@ -669,12 +670,12 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
         // add rules
         $form->addRule(
             'bank_account_number',
-            ts('This is not a correct IBAN.', array('domain' => 'org.project60.sepa')),
+            E::ts('This is not a correct IBAN.'),
             'sepa_iban_valid'
         );
         $form->addRule(
             'bank_identification_number',
-            ts('This is not a correct BIC.', array('domain' => 'org.project60.sepa')),
+            E::ts('This is not a correct BIC.'),
             'sepa_bic_valid'
         );
     }
