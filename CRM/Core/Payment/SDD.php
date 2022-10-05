@@ -38,7 +38,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
     {
         $this->_mode             = $mode;
         $this->_paymentProcessor = $paymentProcessor;
-        $this->_processorName    = ts('SEPA Direct Debit', array('domain' => 'org.project60.sepa'));
+        $this->_processorName    = ts('SEPA Direct Debit', array('domain' => 'org.project60.sepapp'));
         $this->_creditorId       = $paymentProcessor['user_name'];
         try {
             $this->_creditor = civicrm_api3('SepaCreditor', 'getsingle', array('id' => $this->_creditorId));
@@ -202,7 +202,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
             return CRM_Core_Error::createError(
                 ts(
                     "Couldn't create SEPA mandate. Error was: ",
-                    array('domain' => 'org.project60.sepa')
+                    array('domain' => 'org.project60.sepapp')
                 ) . $mandate['error_message']
             );
         }
@@ -518,7 +518,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
                 'account_holder'             => array(
                     'htmlType'    => 'text',
                     'name'        => 'account_holder',
-                    'title'       => ts('Account Holder', array('domain' => 'org.project60.sepa')),
+                    'title'       => ts('Account Holder', array('domain' => 'org.project60.sepapp')),
                     'cc_field'    => true,
                     'attributes'  => array(
                         'size'         => 20,
@@ -531,7 +531,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
                 'bank_account_number'        => array(
                     'htmlType'    => 'text',
                     'name'        => 'bank_account_number',
-                    'title'       => ts('IBAN', array('domain' => 'org.project60.sepa')),
+                    'title'       => ts('IBAN', array('domain' => 'org.project60.sepapp')),
                     'cc_field'    => true,
                     'attributes'  => array(
                         'size'         => 34,
@@ -542,7 +542,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
                         array(
                             'rule_message'    => ts(
                                 'This is not a correct IBAN.',
-                                array('domain' => 'org.project60.sepa')
+                                array('domain' => 'org.project60.sepapp')
                             ),
                             'rule_name'       => 'sepa_iban_valid',
                             'rule_parameters' => null,
@@ -554,7 +554,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
                 'bank_identification_number' => array(
                     'htmlType'    => 'text',
                     'name'        => 'bank_identification_number',
-                    'title'       => ts('BIC', array('domain' => 'org.project60.sepa')),
+                    'title'       => ts('BIC', array('domain' => 'org.project60.sepapp')),
                     'cc_field'    => true,
                     'attributes'  => array(
                         'size'         => 20,
@@ -566,7 +566,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
                         array(
                             'rule_message'    => ts(
                                 'This is not a correct BIC.',
-                                array('domain' => 'org.project60.sepa')
+                                array('domain' => 'org.project60.sepapp')
                             ),
                             'rule_name'       => 'sepa_bic_valid',
                             'rule_parameters' => null,
@@ -576,7 +576,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
                 'bank_name'                  => array(
                     'htmlType'    => 'text',
                     'name'        => 'bank_name',
-                    'title'       => ts('Bank Name', array('domain' => 'org.project60.sepa')),
+                    'title'       => ts('Bank Name', array('domain' => 'org.project60.sepapp')),
                     'cc_field'    => true,
                     'attributes'  => array(
                         'size'         => 34,
@@ -588,7 +588,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
                 'cycle_day'                  => array(
                     'htmlType'    => 'select',
                     'name'        => 'cycle_day',
-                    'title'       => ts('Collection Day', array('domain' => 'org.project60.sepa')),
+                    'title'       => ts('Collection Day', array('domain' => 'org.project60.sepapp')),
                     'cc_field'    => true,
                     'attributes'  => CRM_Sepa_Logic_Settings::getListSetting(
                         "cycledays",
@@ -600,7 +600,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
                 'start_date'                 => array(
                     'htmlType'    => 'text',
                     'name'        => 'start_date',
-                    'title'       => ts('Start Date', array('domain' => 'org.project60.sepa')),
+                    'title'       => ts('Start Date', array('domain' => 'org.project60.sepapp')),
                     'cc_field'    => true,
                     'attributes'  => array(),
                     'is_required' => true,
@@ -622,7 +622,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
         $form->add(
             'text',
             'bank_account_number',
-            ts('IBAN', array('domain' => 'org.project60.sepa')),
+            ts('IBAN', array('domain' => 'org.project60.sepapp')),
             array('size' => 34, 'maxlength' => 34,),
             true
         );
@@ -630,7 +630,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
         $form->add(
             'text',
             'bank_identification_number',
-            ts('BIC', array('domain' => 'org.project60.sepa')),
+            ts('BIC', array('domain' => 'org.project60.sepapp')),
             array('size' => 11, 'maxlength' => 11),
             true
         );
@@ -638,7 +638,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
         $form->add(
             'text',
             'bank_name',
-            ts('Bank Name', array('domain' => 'org.project60.sepa')),
+            ts('Bank Name', array('domain' => 'org.project60.sepapp')),
             array('size' => 20, 'maxlength' => 64),
             false
         );
@@ -646,7 +646,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
         $form->add(
             'text',
             'account_holder',
-            ts('Account Holder', array('domain' => 'org.project60.sepa')),
+            ts('Account Holder', array('domain' => 'org.project60.sepapp')),
             array('size' => 20, 'maxlength' => 64),
             false
         );
@@ -654,14 +654,14 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
         $form->add(
             'select',
             'cycle_day',
-            ts('Collection Day', array('domain' => 'org.project60.sepa')),
+            ts('Collection Day', array('domain' => 'org.project60.sepapp')),
             CRM_Sepa_Logic_Settings::getListSetting("cycledays", range(1, 28), $this->_creditorId),
             false
         );
 
         $form->addDate(
             'start_date',
-            ts('Start Date', array('domain' => 'org.project60.sepa')),
+            ts('Start Date', array('domain' => 'org.project60.sepapp')),
             true,
             array()
         );
@@ -669,12 +669,12 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
         // add rules
         $form->addRule(
             'bank_account_number',
-            ts('This is not a correct IBAN.', array('domain' => 'org.project60.sepa')),
+            ts('This is not a correct IBAN.', array('domain' => 'org.project60.sepapp')),
             'sepa_iban_valid'
         );
         $form->addRule(
             'bank_identification_number',
-            ts('This is not a correct BIC.', array('domain' => 'org.project60.sepa')),
+            ts('This is not a correct BIC.', array('domain' => 'org.project60.sepapp')),
             'sepa_bic_valid'
         );
     }
