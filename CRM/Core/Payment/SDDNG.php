@@ -14,7 +14,7 @@
 | written permission from the original author(s).        |
 +--------------------------------------------------------*/
 
-use CRM_Sepa_ExtensionUtil as E;
+use CRM_Sepapp_ExtensionUtil as E;
 
 /**
  * SEPA_Direct_Debit payment processor
@@ -347,7 +347,7 @@ class CRM_Core_Payment_SDDNG extends CRM_Core_Payment
                 'account_holder'             => array(
                     'htmlType'    => 'text',
                     'name'        => 'account_holder',
-                    'title'       => ts('Account Holder', array('domain' => 'org.project60.sepa')),
+                    'title'       => ts('Account Holder', array('domain' => 'org.project60.sepapp')),
                     'cc_field'    => true,
                     'attributes'  => array(
                         'size'         => 20,
@@ -400,7 +400,7 @@ class CRM_Core_Payment_SDDNG extends CRM_Core_Payment
                 'bank_name'                  => array(
                     'htmlType'    => 'text',
                     'name'        => 'bank_name',
-                    'title'       => ts('Bank Name', array('domain' => 'org.project60.sepa')),
+                    'title'       => ts('Bank Name', array('domain' => 'org.project60.sepapp')),
                     'cc_field'    => true,
                     'attributes'  => array(
                         'size'         => 34,
