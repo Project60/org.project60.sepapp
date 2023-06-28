@@ -249,7 +249,7 @@ function sepapp_civicrm_postProcess($formName, &$form)
                     $paymentProcessor = civicrm_api3(
                         'PaymentProcessor',
                         'getsingle',
-                        array('name' => $form->_submitValues['name'], 'is_test' => 0)
+                        array('name' => $pp['name'], 'is_test' => 0)
                     );
 
                     $creditor_id      = $form->_submitValues['user_name'];
