@@ -251,19 +251,19 @@ class CRM_Core_Payment_SDDNGPostProcessor implements API_Wrapper
     /**
      * Tries to undo some of the stuff done to the recurring contribution
      *
-     * @param $contribution_recur_id int   ContributionRecur ID
-     * @param $contribution          array the individual contribution
-     * @param $payment_instrument_id int   Payment Instrument to set
+     * @param array $params         All params containing installments, contributionRecurID, frequency_interval, frequency_unit
+     * @param int $creditor         The creditor ID
+     * @param array $contribution   The ContributionRecur
      */
     public static function updateRecurringContribution($params, $creditor, $contribution)
     {
         CRM_Sepapp_Configuration::log(
-            "resetContribution [{$contribution_id}/{$payment_instrument_id}]",
+            "resetContribution [{$contribution['id']}]",
             CRM_Sepapp_Configuration::LOG_LEVEL_ERROR
         );
 
         // calculate start_date
-        $start_date = self::getNextPossibleCollectionDate($creditor['id']);
+        $start_date = self::getNextPossibleCollectionDate($creditor);
 
         // calculate installments if requested
         if (!empty($params['installments'])) {
