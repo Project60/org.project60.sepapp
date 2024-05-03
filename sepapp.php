@@ -245,7 +245,7 @@ function sepapp_civicrm_postProcess($formName, &$form)
         if ($pp_id) {
             try {
                 $pp = civicrm_api3("PaymentProcessor", "getsingle", array("id" => $pp_id));
-                if ($pp['class_name'] = "Payment_SDD" || $pp['class_name'] == 'Payment_SDDNG') {
+                if ($pp['class_name'] == "Payment_SDD" || $pp['class_name'] == 'Payment_SDDNG') {
                     $paymentProcessor = civicrm_api3(
                         'PaymentProcessor',
                         'getsingle',
