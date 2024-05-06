@@ -19,7 +19,7 @@ use CRM_Sepapp_ExtensionUtil as E;
 /**
  * Collection of upgrade steps.
  */
-class CRM_Sepapp_Upgrader extends CRM_Sepapp_Upgrader_Base
+class CRM_Sepapp_Upgrader extends CRM_Extension_Upgrader_Base
 {
     /**
      * Module is enabled

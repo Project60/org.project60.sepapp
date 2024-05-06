@@ -287,7 +287,6 @@ function sepapp_civicrm_enable()
  */
 function sepapp_civicrm_disable()
 {
-    _sepapp_civix_civicrm_disable();
 
     // get payment processor...
     $type_ids     = [];
@@ -364,48 +363,6 @@ function sepapp_civicrm_config(&$config)
 function sepapp_civicrm_install()
 {
     _sepapp_civix_civicrm_install();
-}
-
-/**
- * Implements hook_civicrm_postInstall().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_postInstall
- */
-function sepapp_civicrm_postInstall()
-{
-    _sepapp_civix_civicrm_postInstall();
-}
-
-/**
- * Implements hook_civicrm_uninstall().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_uninstall
- */
-function sepapp_civicrm_uninstall()
-{
-    _sepapp_civix_civicrm_uninstall();
-}
-
-/**
- * Implements hook_civicrm_upgrade().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_upgrade
- */
-function sepapp_civicrm_upgrade($op, CRM_Queue_Queue $queue = null)
-{
-    return _sepapp_civix_civicrm_upgrade($op, $queue);
-}
-
-/**
- * Implements hook_civicrm_entityTypes().
- *
- * Declare entity types provided by this module.
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_entityTypes
- */
-function sepapp_civicrm_entityTypes(&$entityTypes)
-{
-    _sepapp_civix_civicrm_entityTypes($entityTypes);
 }
 
 // --- Functions below this ship commented out. Uncomment as required. ---

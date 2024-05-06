@@ -18,14 +18,22 @@
   <version>1.2-beta1</version>
   <develStage>beta</develStage>
   <requires>
-    <ext version=">=1.5">org.project60.sepa</ext>
+    <ext version="&gt;=1.5">org.project60.sepa</ext>
   </requires>
   <compatibility>
-    <ver>5.0</ver>
+    <ver>5.38</ver>
   </compatibility>
   <comments>This used to be part of CiviSEPA</comments>
   <civix>
     <namespace>CRM/Sepapp</namespace>
-    <format>22.05.2</format>
+    <format>23.02.1</format>
   </civix>
+  <classloader>
+    <psr0 prefix="CRM_" path="."/>
+    <psr4 prefix="Civi\" path="Civi"/>
+  </classloader>
+  <upgrader>CRM_Sepapp_Upgrader</upgrader>
+  <mixins>
+    <mixin>smarty-v2@1.0.1</mixin>
+  </mixins>
 </extension>
