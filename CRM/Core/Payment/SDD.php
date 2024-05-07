@@ -27,8 +27,10 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
     protected $_params = array();
     protected $_paymentForm = null;
     static private $_singleton = null;
+    protected $_creditorId;
+    protected $_creditor;
 
-    /**
+  /**
      * Constructor
      *
      * @param string $mode the mode of operation: live or test
