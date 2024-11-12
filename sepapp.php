@@ -265,13 +265,23 @@ function sepapp_civicrm_postProcess($formName, &$form)
                 throw new Exception("Couldn't find PaymentProcessorType [{$pp_id}]");
             }
         }
-    } elseif ('CRM_Contribute_Form_Contribution_Confirm' == $formName) {
-        // post process the contributions created
-        CRM_Core_Payment_SDD::processPartialMandates();
-    } elseif ('CRM_Event_Form_Registration_Confirm' == $formName) {
+    } elseif ('CRM_Contribute_Form_Contribution_Confirm' == $formName || 'CRM_Event_Form_Registration_Confirm' == $formName) {
+        // SDD: make sure mandate is created:
+        CRM_Core_Payment_SDDNGPostProcessor::createPendingMandate();
+
         // post process the contributions created
         CRM_Core_Payment_SDD::processPartialMandates();
     }
+}
+
+/**
+ * Implements hook_civicrm_postSave_[table_name].
+ *
+ * We have to use this because comletetransaction apiWrapper does not work.
+ */
+function sepapp_civicrm_postSave_civicrm_contribution($dao) {
+    $contribution_id = $dao->id;
+    CRM_Core_Payment_SDDNG::setPendingContributionID($contribution_id);
 }
 
 /**
