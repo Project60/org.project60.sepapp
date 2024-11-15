@@ -1,5 +1,7 @@
 # CiviSEPA Payment Processors
 
+This project is, as of 2024-011-15, maintained by [Detlev Sieber](https://github.com/Detsieber) , please direct any questions to him.
+
 This CiviCRM extension contains two payment processors for the [CiviSEPA extension](https://github.com/Project60/org.project60.sepa).
 
 They were originally part of CiviSEPA, but they seem to be more volatile and need more tweaking depending on your CiviCRM version and your payment processor setup.
