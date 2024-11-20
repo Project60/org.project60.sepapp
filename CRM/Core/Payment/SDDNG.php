@@ -316,6 +316,34 @@ class CRM_Core_Payment_SDDNG extends CRM_Core_Payment
     }
 
     /**
+     * Get help text information (help, description, etc.) about this payment,
+     * to display to the user.
+     *
+     * @param string $context
+     *   Context of the text.
+     *   Only explicitly supported contexts are handled without error.
+     *   Currently supported:
+     *   - contributionPageRecurringHelp (params: is_recur_installments, is_email_receipt)
+     *
+     * @param array $params
+     *   Parameters for the field, context specific.
+     *
+     * @return string
+     */
+    public function getText($context, $params): string {
+        switch ($context) {
+            case 'agreementTitle':
+                return ts('Agreement');
+
+            case 'agreementText':
+                return ts('Your account data will be used to charge your bank account via direct debit. While submitting this form you agree to the charging of your bank account via direct debit.');
+
+            default:
+                return parent::getText($context, $params);
+        }
+    }
+
+    /**
      * Override CRM_Core_Payment function
      */
     public function _getPaymentFormFields()
