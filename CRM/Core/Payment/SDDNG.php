@@ -220,6 +220,11 @@ class CRM_Core_Payment_SDDNG extends CRM_Core_Payment
         return null;
     }
 
+    public static function setPendingContributionID(int $contribution_id) {
+        self::$_pending_mandate['contribution_id'] = $contribution_id;
+        self::$_pending_mandate['contributionID'] = $contribution_id;
+    }
+
     public static function releasePendingMandateData($contribution_id)
     {
         if (!self::$_pending_mandate) {
