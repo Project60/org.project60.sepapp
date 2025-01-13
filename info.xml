@@ -5,8 +5,8 @@
   <description>Provides a CiviCRM payment processor for the CiviSEPA extension</description>
   <license>AGPL-3.0</license>
   <maintainer>
-    <author>B. Endres</author>
-    <email>endres@systopia.de</email>
+    <author>Martin Correll</author>
+    <email>martin.correll@civiservice.de</email>
   </maintainer>
   <urls>
     <url desc="Main Extension Page">https://github.com/Project60/org.project60.sepapp</url>
@@ -14,16 +14,16 @@
     <url desc="Support">https://github.com/Project60/org.project60.sepapp/issues</url>
     <url desc="Licensing">https://www.gnu.org/licenses/agpl-3.0.html</url>
   </urls>
-  <releaseDate></releaseDate>
-  <version>1.3-dev</version>
-  <develStage>dev</develStage>
+  <releaseDate>2025-01-13</releaseDate>
+  <version>1.2-beta5</version>
+  <develStage>beta</develStage>
   <requires>
     <ext version="&gt;=1.5">org.project60.sepa</ext>
   </requires>
   <compatibility>
     <ver>5.38</ver>
   </compatibility>
-  <comments>This used to be part of CiviSEPA</comments>
+  <comments>This used to be part of CiviSEPA and was developed by B. Endres (endres@systopia.de).</comments>
   <civix>
     <namespace>CRM/Sepapp</namespace>
     <format>23.02.1</format>
