@@ -118,7 +118,7 @@ class CRM_Core_Payment_SDDNG extends CRM_Core_Payment
         }
 
         // make sure there's not an pending mandate
-        if (self::$_pending_mandate) {
+        if (self::$_pending_mandate && isset(self::$_pending_mandate['iban'])) {
             CRM_Sepapp_Configuration::log(
                 "No pending mandate found. This is a workflow error.",
                 CRM_Sepapp_Configuration::LOG_LEVEL_ERROR

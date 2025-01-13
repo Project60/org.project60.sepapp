@@ -236,9 +236,6 @@ function sepapp_civicrm_buildForm($formName, &$form)
  */
 function sepapp_civicrm_postProcess($formName, &$form)
 {
-    // SDD: make sure mandate is created:
-    CRM_Core_Payment_SDDNGPostProcessor::createPendingMandate();
-
     // also: check payment processor
     if ("CRM_Admin_Form_PaymentProcessor" == $formName) {
         $pp_id = $form->getVar('_id');
@@ -266,9 +263,8 @@ function sepapp_civicrm_postProcess($formName, &$form)
             }
         }
     } elseif ('CRM_Contribute_Form_Contribution_Confirm' == $formName || 'CRM_Event_Form_Registration_Confirm' == $formName) {
-        // SDD: make sure mandate is created:
+        // SDD: make sure mandate is created, when needed:
         CRM_Core_Payment_SDDNGPostProcessor::createPendingMandate();
-
         // post process the contributions created
         CRM_Core_Payment_SDD::processPartialMandates();
     }
