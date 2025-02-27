@@ -117,13 +117,17 @@ class CRM_Core_Payment_SDDNG extends CRM_Core_Payment
             throw new \Civi\Payment\Exception\PaymentProcessorException($bad_bic);
         }
 
-        // make sure there's not an pending mandate
-        if (self::$_pending_mandate && isset(self::$_pending_mandate['iban'])) {
-            CRM_Sepapp_Configuration::log(
-                "No pending mandate found. This is a workflow error.",
-                CRM_Sepapp_Configuration::LOG_LEVEL_ERROR
-            );
-            throw new \Civi\Payment\Exception\PaymentProcessorException("SDD PaymentProcessor NG: workflow broken.");
+        // make sure there's no pending mandate
+        if (self::$_pending_mandate) {
+            if (isset($params['contributionID']) && isset(self::$_pending_mandate['contributionID'])) {
+              if ($params['contributionID'] != self::$_pending_mandate['contributionID']) {
+                CRM_Sepapp_Configuration::log(
+                  "Pending mandate found. This is a workflow error.",
+                  CRM_Sepapp_Configuration::LOG_LEVEL_ERROR
+                );
+                throw new \Civi\Payment\Exception\PaymentProcessorException("SDD PaymentProcessor NG: workflow broken.");
+              }
+            }
         }
 
         // all good? let's prime the post-hook
@@ -231,6 +235,11 @@ class CRM_Core_Payment_SDDNG extends CRM_Core_Payment
             // nothing pending, nothing to do
             return null;
         }
+        if (empty(self::$_pending_mandate['payment_processor_id'])) {
+          // non complete data
+          return null;
+        }
+
         CRM_Sepapp_Configuration::log(
             "releasePendingMandateData for contribution ID [{$contribution_id}]",
             CRM_Sepapp_Configuration::LOG_LEVEL_DEBUG
