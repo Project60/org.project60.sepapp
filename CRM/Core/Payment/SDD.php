@@ -14,7 +14,9 @@
 | written permission from the original author(s).        |
 +--------------------------------------------------------*/
 
+use Civi\Payment\Exception\PaymentProcessorException;
 use CRM_Sepa_ExtensionUtil as E;
+
 
 /**
  * SEPA_Direct_Debit payment processor
@@ -153,8 +155,20 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
      *
      * @return array the result in an nice formatted array (or an error object)
      */
-    function doDirectPayment(&$params)
+    public function doPayment(&$params, $component = 'contribute')
     {
+        $propertyBag = \Civi\Payment\PropertyBag::cast($params);
+        $this->_component = $component;
+
+        if ($propertyBag->getAmount() == 0) {
+            $result = $this->setStatusPaymentCompleted([]);
+            return $result;
+        }
+
+        if ($this->_paymentProcessor['billing_mode'] == 4) {
+            throw new PaymentProcessorException("Cannot handle Transfer payments");
+        }
+
         $original_parameters = $params;
 
         // get contact ID (see SEPA-359)
@@ -242,10 +256,10 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
                     'cycle_day'  => $params['cycle_day'],
                     'trxn_id'    => $params['trxn_id']
                 )
-            );
-        }
+            ); }
+        $result = $this->setStatusPaymentPending($params);
 
-        return $params;
+        return $result;
     }
 
 
