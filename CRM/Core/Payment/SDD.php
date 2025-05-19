@@ -85,7 +85,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
     }
 
 
-    function buildForm(&$form)
+    public function buildForm(&$form)
     {
         // add rules
         if ($this->_creditor['creditor_type'] == 'SEPA') {
@@ -478,7 +478,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
         //   effectively render the billing block "not mandatory"
         if (isset($errors)) {
             foreach ($errors as $fieldname => $error_message) {
-                if (substr($fieldname, 0, 8) == 'billing_') {
+                if (str_starts_with($fieldname, 'billing_')) {
                     unset($errors[$fieldname]);
                 }
             }

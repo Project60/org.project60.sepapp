@@ -58,15 +58,15 @@ class CRM_Core_Payment_SDDNGPostProcessor implements API_Wrapper
      */
     public static function createPendingMandate($contribution_id = null)
     {
-        CRM_Sepapp_Configuration::log(
-            "createPendingMandate for contribution ID [{$contribution_id}]",
-            CRM_Sepapp_Configuration::LOG_LEVEL_DEBUG
-        );
-
         // fall back to current ID
         if ($contribution_id == null) {
             $contribution_id = CRM_Core_Payment_SDDNG::getPendingContributionID();
         }
+
+        CRM_Sepapp_Configuration::log(
+            "createPendingMandate for contribution ID [{$contribution_id}]",
+            CRM_Sepapp_Configuration::LOG_LEVEL_DEBUG
+        );
 
         // get pending mandate data (and mark as processed)
         $params = CRM_Core_Payment_SDDNG::releasePendingMandateData($contribution_id);
@@ -201,7 +201,7 @@ class CRM_Core_Payment_SDDNGPostProcessor implements API_Wrapper
     {
         CRM_Sepapp_Configuration::log(
             "resetContribution [{$contribution_id}/{$payment_instrument_id}]",
-            CRM_Sepapp_Configuration::LOG_LEVEL_ERROR
+            CRM_Sepapp_Configuration::LOG_LEVEL_DEBUG
         );
         // update contribution... this can be tricky
         $status_pending = (int)CRM_Core_PseudoConstant::getKey(
@@ -243,8 +243,11 @@ class CRM_Core_Payment_SDDNGPostProcessor implements API_Wrapper
       DELETE FROM civicrm_financial_trxn
       WHERE id IN (SELECT etx.financial_trxn_id 
                    FROM civicrm_entity_financial_trxn etx 
-                   WHERE etx.entity_id = {$contribution_id}
-                     AND etx.entity_table = 'civicrm_contribution');"
+                   WHERE etx.entity_id = %1
+                     AND etx.entity_table = 'civicrm_contribution');",
+          [
+            1 => [$contribution_id, 'Integer']
+          ]
         );
     }
 
@@ -259,7 +262,7 @@ class CRM_Core_Payment_SDDNGPostProcessor implements API_Wrapper
     {
         CRM_Sepapp_Configuration::log(
             "resetContribution [{$contribution['id']}]",
-            CRM_Sepapp_Configuration::LOG_LEVEL_ERROR
+            CRM_Sepapp_Configuration::LOG_LEVEL_DEBUG
         );
 
         // calculate start_date
