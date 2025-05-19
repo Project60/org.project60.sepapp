@@ -229,6 +229,15 @@ class CRM_Core_Payment_SDDNG extends CRM_Core_Payment
         self::$_pending_mandate['contributionID'] = $contribution_id;
     }
 
+    /**
+   * Just for testing.
+   * @param array $data
+   * @return void
+   */
+    public static function setPendingMandateData(array $data): void {
+      self::$_pending_mandate = array_merge(self::$_pending_mandate, $data);
+    }
+
     public static function releasePendingMandateData($contribution_id)
     {
         if (!self::$_pending_mandate) {

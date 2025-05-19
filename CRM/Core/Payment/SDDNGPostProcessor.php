@@ -58,15 +58,15 @@ class CRM_Core_Payment_SDDNGPostProcessor implements API_Wrapper
      */
     public static function createPendingMandate($contribution_id = null)
     {
-        CRM_Sepapp_Configuration::log(
-            "createPendingMandate for contribution ID [{$contribution_id}]",
-            CRM_Sepapp_Configuration::LOG_LEVEL_DEBUG
-        );
-
         // fall back to current ID
         if ($contribution_id == null) {
             $contribution_id = CRM_Core_Payment_SDDNG::getPendingContributionID();
         }
+
+        CRM_Sepapp_Configuration::log(
+            "createPendingMandate for contribution ID [{$contribution_id}]",
+            CRM_Sepapp_Configuration::LOG_LEVEL_DEBUG
+        );
 
         // get pending mandate data (and mark as processed)
         $params = CRM_Core_Payment_SDDNG::releasePendingMandateData($contribution_id);
