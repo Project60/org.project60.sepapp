@@ -285,7 +285,7 @@ class CRM_Core_Payment_SDDNG extends CRM_Core_Payment
 
         // BUFFER DAYS / TODO: MOVE TO SERVICE
         $creditor           = $this->getCreditor();
-        $buffer_days        = (int)CRM_Sepa_Logic_Settings::getSetting("pp_buffer_days");
+        $buffer_days        = (int) CRM_Sepa_Logic_Settings::getGenericSetting('pp_buffer_days');
         $frst_notice_days   = (int)CRM_Sepa_Logic_Settings::getSetting("batching.FRST.notice", $creditor['id']);
         $ooff_notice_days   = (int)CRM_Sepa_Logic_Settings::getSetting("batching.OOFF.notice", $creditor['id']);
         $earliest_rcur_date = strtotime("now + $frst_notice_days days + $buffer_days days");

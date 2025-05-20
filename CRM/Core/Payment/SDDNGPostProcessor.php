@@ -337,7 +337,7 @@ class CRM_Core_Payment_SDDNGPostProcessor implements API_Wrapper
      */
     public static function getNextPossibleCollectionDate($creditor_id, $now = 'now')
     {
-        $buffer_days      = (int)CRM_Sepa_Logic_Settings::getSetting("pp_buffer_days");
+        $buffer_days      = (int) CRM_Sepa_Logic_Settings::getGenericSetting('pp_buffer_days');
         $frst_notice_days = (int)CRM_Sepa_Logic_Settings::getSetting("batching.FRST.notice", $creditor_id);
         $cycle_days       = CRM_Sepa_Logic_Settings::getListSetting("cycledays", range(1, 28), $creditor_id);
 
