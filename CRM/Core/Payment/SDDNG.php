@@ -90,10 +90,6 @@ class CRM_Core_Payment_SDDNG extends CRM_Core_Payment
      */
     public function doDirectPayment(&$params)
     {
-        CRM_Sepapp_Configuration::log(
-            "doDirectPayment called: " . json_encode($params),
-            CRM_Sepapp_Configuration::LOG_LEVEL_DEBUG
-        );
         $original_parameters = $params;
 
         // extract SEPA data
@@ -106,14 +102,20 @@ class CRM_Core_Payment_SDDNG extends CRM_Core_Payment
         // verify IBAN
         $bad_iban = CRM_Sepa_Logic_Verification::verifyIBAN($params['iban']);
         if ($bad_iban) {
-            CRM_Sepapp_Configuration::log("IBAN issue: {$bad_iban}");
+            CRM_Sepapp_Configuration::log(
+                "IBAN issue: {$bad_iban}",
+                CRM_Sepapp_Configuration::LOG_LEVEL_ERROR
+            );
             throw new \Civi\Payment\Exception\PaymentProcessorException($bad_iban);
         }
 
         // verify BIC
         $bad_bic = CRM_Sepa_Logic_Verification::verifyBIC($params['bic']);
         if ($bad_bic) {
-            CRM_Sepapp_Configuration::log("BIC issue: {$bad_bic}");
+            CRM_Sepapp_Configuration::log(
+                "BIC issue: {$bad_bic}",
+                CRM_Sepapp_Configuration::LOG_LEVEL_ERROR
+            );
             throw new \Civi\Payment\Exception\PaymentProcessorException($bad_bic);
         }
 
@@ -122,8 +124,8 @@ class CRM_Core_Payment_SDDNG extends CRM_Core_Payment
             if (isset($params['contributionID']) && isset(self::$_pending_mandate['contributionID'])) {
               if ($params['contributionID'] != self::$_pending_mandate['contributionID']) {
                 CRM_Sepapp_Configuration::log(
-                  "Pending mandate found. This is a workflow error.",
-                  CRM_Sepapp_Configuration::LOG_LEVEL_ERROR
+                    "Pending mandate found. This is a workflow error.",
+                    CRM_Sepapp_Configuration::LOG_LEVEL_ERROR
                 );
                 throw new \Civi\Payment\Exception\PaymentProcessorException("SDD PaymentProcessor NG: workflow broken.");
               }
@@ -257,7 +259,10 @@ class CRM_Core_Payment_SDDNG extends CRM_Core_Payment
         $pending_contribution_id = self::getPendingContributionID();
         if ($contribution_id != $pending_contribution_id) {
             // something's wrong here
-            CRM_Sepapp_Configuration::log("SDD PP workflow error", CRM_Sepapp_Configuration::LOG_LEVEL_ERROR);
+            CRM_Sepapp_Configuration::log(
+                "SDD PP workflow error",
+                CRM_Sepapp_Configuration::LOG_LEVEL_ERROR
+            );
             return null;
         }
 

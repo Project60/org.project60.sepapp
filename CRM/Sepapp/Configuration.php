@@ -26,7 +26,7 @@ class CRM_Sepapp_Configuration
     const LOG_LEVEL_INFO = 10;
     const LOG_LEVEL_ERROR = 20;
 
-    static protected $LOG_LEVEL = self::LOG_LEVEL_DEBUG;
+    static protected $LOG_LEVEL = self::LOG_LEVEL_AUDIT;
 
     /**
      * Log messages
@@ -37,7 +37,12 @@ class CRM_Sepapp_Configuration
     public static function log($message, $level = self::LOG_LEVEL_AUDIT)
     {
         if ($level >= self::$LOG_LEVEL) {
-            Civi::log()->debug("SepaPP: {$message}");
+            if ($level == self::LOG_LEVEL_ERROR) {
+              Civi::log()->error("SepaPP: " . $message);
+            }
+            else {
+              Civi::log()->debug("SepaPP: " . $message);
+            }
         }
     }
 }

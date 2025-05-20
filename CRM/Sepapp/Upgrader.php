@@ -68,7 +68,8 @@ class CRM_Sepapp_Upgrader extends CRM_Extension_Upgrader_Base
             $result                         = civicrm_api3('PaymentProcessorType', 'create', $payment_processor_data);
             $sdd_pp_type_ids[$result['id']] = 'Payment_SDD';
             CRM_Sepapp_Configuration::log(
-                "org.project60.sepa_dd: created payment processor with name PP_SDD_PROCESSOR_TYPE"
+                "org.project60.sepa_dd: created payment processor with name PP_SDD_PROCESSOR_TYPE",
+                CRM_Sepapp_Configuration::LOG_LEVEL_AUDIT
             );
         } else {
             // already exists => enable if not enabled
@@ -109,7 +110,8 @@ class CRM_Sepapp_Upgrader extends CRM_Extension_Upgrader_Base
             $result                         = civicrm_api3('PaymentProcessorType', 'create', $payment_processor_data);
             $sdd_pp_type_ids[$result['id']] = 'Payment_SDDNG';
             CRM_Sepapp_Configuration::log(
-                "org.project60.sepa_dd: created payment processor with name 'SEPA_Direct_Debit_NG'"
+                "org.project60.sepa_dd: created payment processor with name 'SEPA_Direct_Debit_NG'",
+                CRM_Sepapp_Configuration::LOG_LEVEL_AUDIT
             );
         } else {
             // already exists => enable if not enabled
@@ -178,8 +180,10 @@ class CRM_Sepapp_Upgrader extends CRM_Extension_Upgrader_Base
                 $message = E::ts("Your CiviSEPA payment processors have been disabled.");
                 CRM_Core_DAO::executeQuery("UPDATE civicrm_payment_processor SET class_name='Payment_Dummy' WHERE payment_processor_type_id IN ({$sdd_processor_type_id_list});");
                 CRM_Core_Session::setStatus($message, E::ts("%1 Payment Processor(s) Disabled!", [1 => $use_count]), 'warn');
-                CRM_Sepapp_Configuration::log($message, CRM_Sepapp_Configuration::LOG_LEVEL_INFO);
-
+                CRM_Sepapp_Configuration::log(
+                    $message,
+                    CRM_Sepapp_Configuration::LOG_LEVEL_INFO
+                );
             } else {
                 // if they are _not_ used, we can simply delete them.
                 foreach ($sdd_processor_type_ids as $sdd_processor_type_id) {

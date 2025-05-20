@@ -440,7 +440,8 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
                 } else {
                     // something went wrong, delete partial
                     CRM_Sepapp_Configuration::log(
-                        "org.project60.sepa: deleting partial mandate " . $mandate['reference']
+                        "org.project60.sepa: deleting partial mandate " . $mandate['reference'],
+                        CRM_Sepapp_Configuration::LOG_LEVEL_INFO
                     );
                     civicrm_api3('SepaMandate', 'delete', array('id' => $mandate_id));
                 }
