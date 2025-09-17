@@ -132,7 +132,7 @@ function sepapp_civicrm_buildForm($formName, &$form)
         );
     } elseif ($formName == "CRM_Event_Form_Registration_Confirm") {                          // EVENT REGISTRATION CONFIRMATION PAGE
         // only for our SDD payment processors:
-        $pp = $form->getTemplate()->get_template_vars('paymentProcessor');
+        $pp = $form->getTemplate()->getTemplateVars('paymentProcessor');
         if ($pp['class_name'] != "Payment_SDD") {
             return;
         }
@@ -174,7 +174,7 @@ function sepapp_civicrm_buildForm($formName, &$form)
         }
 
         // this IS ours
-        $mandate_reference = $form->getTemplate()->get_template_vars('trxn_id');
+        $mandate_reference = $form->getTemplate()->getTemplateVars('trxn_id');
         if ($mandate_reference) {
             $mandate       = civicrm_api3('SepaMandate', 'getsingle', array('reference' => $mandate_reference));
             $creditor      = civicrm_api3('SepaCreditor', 'getsingle', array('id' => $mandate['creditor_id']));
@@ -205,12 +205,12 @@ function sepapp_civicrm_buildForm($formName, &$form)
         );
     } elseif ($formName == "CRM_Event_Form_Registration_ThankYou") {                        // EVENT REGISTRATION THANK YOU PAGE
         // only for our SDD payment processors:
-        $pp = $form->getTemplate()->get_template_vars('paymentProcessor');
+        $pp = $form->getTemplate()->getTemplateVars('paymentProcessor');
         if ($pp['class_name'] != "Payment_SDD") {
             return;
         }
 
-        $mandate_reference = $form->getTemplate()->get_template_vars('trxn_id');
+        $mandate_reference = $form->getTemplate()->getTemplateVars('trxn_id');
         if ($mandate_reference) {
             $mandate      = civicrm_api3('SepaMandate', 'getsingle', array('reference' => $mandate_reference));
             $creditor     = civicrm_api3('SepaCreditor', 'getsingle', array('id' => $mandate['creditor_id']));
