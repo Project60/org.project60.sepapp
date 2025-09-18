@@ -21,7 +21,7 @@
     <ext version="&gt;=1.5">org.project60.sepa</ext>
   </requires>
   <compatibility>
-    <ver>5.38</ver>
+    <ver>5.70</ver>
   </compatibility>
   <comments>This used to be part of CiviSEPA and was developed by B. Endres (endres@systopia.de).</comments>
   <civix>
