@@ -43,7 +43,6 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment
     {
         $this->_mode             = $mode;
         $this->_paymentProcessor = $paymentProcessor;
-        $this->_processorName    = E::ts('SEPA Direct Debit');
         $this->_creditorId       = $paymentProcessor['user_name'];
         try {
             $this->_creditor = civicrm_api3('SepaCreditor', 'getsingle', array('id' => $this->_creditorId));
