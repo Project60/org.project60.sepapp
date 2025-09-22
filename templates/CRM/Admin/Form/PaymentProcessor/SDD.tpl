@@ -31,8 +31,8 @@
 
 {* Create creditors dropdown help *}
 <a id='creditor_id_help'
-   onclick='CRM.help("{ts domain="org.project60.sepapp"}Creditor{/ts}", {literal}{"id":"id-creditor-help","file":"CRM\/Admin\/Form\/PaymentProcessor/SDD"}{/literal}); return false;'
-   href="#" title="{ts domain="org.project60.sepapp"}Help{/ts}" class="helpicon">&nbsp;</a>
+   onclick='CRM.help("{ts escape='htmlattribute' domain="org.project60.sepapp"}Creditor{/ts}", {literal}{"id":"id-creditor-help","file":"CRM\/Admin\/Form\/PaymentProcessor/SDD"}{/literal}); return false;'
+   href="#" title="{ts escape='htmlattribute' domain="org.project60.sepapp"}Help{/ts}" class="helpicon">&nbsp;</a>
 
 
 {* Create creditors dropdown for test pp *}
@@ -50,8 +50,8 @@
 
 {* Create test creditors dropdown help *}
 <a id='test_creditor_id_help'
-   onclick='CRM.help("{ts domain="org.project60.sepapp"}Creditor{/ts}", {literal}{"id":"id-creditor-help","file":"CRM\/Admin\/Form\/PaymentProcessor/SDD"}{/literal}); return false;'
-   href="#" title="{ts domain="org.project60.sepapp"}Help{/ts}" class="helpicon">&nbsp;</a>
+   onclick='CRM.help("{ts escape='htmlattribute' domain="org.project60.sepapp"}Creditor{/ts}", {literal}{"id":"id-creditor-help","file":"CRM\/Admin\/Form\/PaymentProcessor/SDD"}{/literal}); return false;'
+   href="#" title="{ts escape='htmlattribute' domain="org.project60.sepapp"}Help{/ts}" class="helpicon">&nbsp;</a>
 
 
 <script type="text/javascript">
