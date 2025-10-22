@@ -94,7 +94,7 @@ class CRM_Core_Payment_SDDNGPostProcessor implements API_Wrapper
         );
 
         // load creditor
-        $creditor_id = (int)CRM_Utils_Array::value('user_name', $payment_processor);
+        $creditor_id = (int) ($payment_processor['user_name'] ?? 0);
         if (!$creditor_id) {
             CRM_Sepapp_Configuration::log(
                 "No creditor found for PaymentProcessor [{$payment_processor['id']}]",
@@ -123,8 +123,8 @@ class CRM_Core_Payment_SDDNGPostProcessor implements API_Wrapper
                     'entity_table'    => 'civicrm_contribution',
                     'entity_id'       => $contribution_id,
                     'contact_id'      => $contribution['contact_id'],
-                    'campaign_id'     => CRM_Utils_Array::value('campaign_id', $contribution),
-                    'currency'        => CRM_Utils_Array::value('currency', $creditor, 'EUR'),
+                    'campaign_id'     => $contribution['campaign_id'] ?? NULL,
+                    'currency'        => $creditor['currency'] ?? 'EUR',
                     'date'            => date('YmdHis'),
                     'creation_date'   => date('YmdHis'),
                     'validation_date' => date('YmdHis'),
@@ -166,8 +166,8 @@ class CRM_Core_Payment_SDDNGPostProcessor implements API_Wrapper
                     'entity_table'    => 'civicrm_contribution_recur',
                     'entity_id'       => $params['contributionRecurID'],
                     'contact_id'      => $contribution['contact_id'],
-                    'campaign_id'     => CRM_Utils_Array::value('campaign_id', $contribution),
-                    'currency'        => CRM_Utils_Array::value('currency', $creditor, 'EUR'),
+                    'campaign_id'     => $contribution['campaign_id'] ?? NULL,
+                    'currency'        => $creditor['currency'] ?? 'EUR',
                     'date'            => date('YmdHis'),
                     'creation_date'   => date('YmdHis'),
                     'validation_date' => date('YmdHis'),
