@@ -34,6 +34,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment {
    * Constructor
    *
    * @param string $mode the mode of operation: live or test
+   * @param $paymentProcessor
    *
    * @return void
    */
@@ -70,6 +71,9 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment {
    * singleton function used to manage this object
    *
    * @param string $mode the mode of operation: live or test
+   * @param $paymentProcessor
+   * @param null $paymentForm
+   * @param bool $force
    *
    * @return object
    * @static
@@ -146,6 +150,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment {
    * payment process
    *
    * @param array $params assoc array of input parameters for this transaction
+   * @param string $component
    *
    * @return array the result in an nice formatted array (or an error object)
    */
