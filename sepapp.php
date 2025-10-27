@@ -19,7 +19,7 @@ require_once 'sepapp.civix.php';
 use CRM_Sepapp_ExtensionUtil as E;
 
 /**
- * Provides the SEPA payment processor
+ * Provides the SEPA payment processor.
  *
  * @package CiviCRM_SEPA
  *
@@ -29,7 +29,9 @@ define('PP_SDD_PROCESSOR_TYPE', 'SEPA_Direct_Debit');
 define('PP_SDD_PROCESSOR_TYPE_NEW', 'SEPA_Direct_Debit_NG');
 
 /**
- * buildForm Hook for payment processor
+ * Implements hook_civicrm_buildForm().
+ *
+ * buildForm Hook for payment processor.
  */
 function sepapp_civicrm_buildForm($formName, &$form) {
   // PAYMENT PROCESSOR CONFIGURATION PAGE
@@ -38,7 +40,7 @@ function sepapp_civicrm_buildForm($formName, &$form) {
     $pp_id = $form->getVar('_id');
     $pp_type_id = $form->getVar('_paymentProcessorType');
     if ($pp_id || $pp_type_id) {
-      // check if its ours (looking into pp or pp_type:
+      // check if it's ours (looking into pp or pp_type:
       $pp_class_name = '';
       if ($pp_id) {
         $pp = civicrm_api3("PaymentProcessor", "getsingle", ["id" => $pp_id]);
@@ -93,11 +95,9 @@ function sepapp_civicrm_buildForm($formName, &$form) {
         $form->assign('test_creditors', $test_creditors);
 
         // add new elements
-        CRM_Core_Region::instance('page-body')->add(
-          [
-            'template' => 'CRM/Admin/Form/PaymentProcessor/SDD.tpl',
-          ]
-        );
+        CRM_Core_Region::instance('page-body')->add([
+          'template' => 'CRM/Admin/Form/PaymentProcessor/SDD.tpl',
+        ]);
       }
     }
   }
@@ -106,11 +106,9 @@ function sepapp_civicrm_buildForm($formName, &$form) {
     $mendForm = CRM_Core_BAO_Setting::getItem('SEPA Direct Debit Preferences', 'pp_improve_frequency');
     if ($mendForm) {
       // inject improved form logic
-      CRM_Core_Region::instance('page-body')->add(
-        [
-          'template' => 'CRM/Contribute/Form/ContributionMain.sepa.tpl',
-        ]
-      );
+      CRM_Core_Region::instance('page-body')->add([
+        'template' => 'CRM/Contribute/Form/ContributionMain.sepa.tpl',
+      ]);
     }
   }
   // PAYMENT PROCESS CONFIRMATION PAGE
@@ -130,11 +128,9 @@ function sepapp_civicrm_buildForm($formName, &$form) {
     }
 
     // this IS our processor -> inject stuff
-    CRM_Core_Region::instance('page-body')->add(
-      [
-        'template' => 'CRM/Contribute/Form/ContributionConfirm.sepa.tpl',
-      ]
-    );
+    CRM_Core_Region::instance('page-body')->add([
+      'template' => 'CRM/Contribute/Form/ContributionConfirm.sepa.tpl',
+    ]);
   }
   // EVENT REGISTRATION CONFIRMATION PAGE
   elseif ($formName == "CRM_Event_Form_Registration_Confirm") {
@@ -148,11 +144,7 @@ function sepapp_civicrm_buildForm($formName, &$form) {
     //    how to extract bank_bic and bank_iban variables properly...
     $form_data = print_r($form, TRUE);
     $matches = [];
-    if (preg_match(
-      '/\[bank_identification_number\] => (?P<bank_identification_number>[\w0-9]+)/i',
-      $form_data,
-      $matches
-    )) {
+    if (preg_match('/\[bank_identification_number\] => (?P<bank_identification_number>[\w0-9]+)/i', $form_data, $matches)) {
       $form->assign("bank_identification_number", $matches[1]);
     }
     $matches = [];
@@ -161,11 +153,9 @@ function sepapp_civicrm_buildForm($formName, &$form) {
     }
     unset($form_data);
 
-    CRM_Core_Region::instance('page-body')->add(
-      [
-        'template' => 'CRM/Event/Form/RegistrationConfirm.sepa.tpl',
-      ]
-    );
+    CRM_Core_Region::instance('page-body')->add([
+      'template' => 'CRM/Event/Form/RegistrationConfirm.sepa.tpl',
+    ]);
   }
   // PAYMENT PROCESS THANK YOU PAGE
   elseif ($formName == "CRM_Contribute_Form_Contribution_ThankYou") {
@@ -208,11 +198,9 @@ function sepapp_civicrm_buildForm($formName, &$form) {
       $form->assign("cycle_day", CRM_Sepa_Logic_Batching::getCycleDay($rcontribution, $creditor['id']));
     }
 
-    CRM_Core_Region::instance('contribution-thankyou-billing-block')->add(
-      [
-        'template' => 'CRM/Contribute/Form/ContributionThankYou.sepa.tpl',
-      ]
-    );
+    CRM_Core_Region::instance('contribution-thankyou-billing-block')->add([
+      'template' => 'CRM/Contribute/Form/ContributionThankYou.sepa.tpl',
+    ]);
   }
   // EVENT REGISTRATION THANK YOU PAGE
   elseif ($formName == "CRM_Event_Form_Registration_ThankYou") {
@@ -234,17 +222,16 @@ function sepapp_civicrm_buildForm($formName, &$form) {
       $form->assign("collection_date", $contribution['receive_date']);
     }
 
-    CRM_Core_Region::instance('page-body')->add(
-      [
-        'template' => 'CRM/Event/Form/RegistrationThankYou.sepa.tpl',
-      ]
-    );
+    CRM_Core_Region::instance('page-body')->add([
+      'template' => 'CRM/Event/Form/RegistrationThankYou.sepa.tpl',
+    ]);
   }
 }
 
 /**
- * postProcess Hook for payment processor
- * (old approach)
+ * Implements hook_civicrm_postProcess().
+ *
+ * postProcess Hook for payment processor (old approach).
  */
 function sepapp_civicrm_postProcess($formName, &$form) {
   // also: check payment processor
@@ -254,11 +241,10 @@ function sepapp_civicrm_postProcess($formName, &$form) {
       try {
         $pp = civicrm_api3("PaymentProcessor", "getsingle", ["id" => $pp_id]);
         if ($pp['class_name'] == "Payment_SDD" || $pp['class_name'] == 'Payment_SDDNG') {
-          $paymentProcessor = civicrm_api3(
-            'PaymentProcessor',
-            'getsingle',
-            ['name' => $pp['name'], 'is_test' => 0]
-          );
+          $paymentProcessor = civicrm_api3('PaymentProcessor', 'getsingle', [
+            'name' => $pp['name'],
+            'is_test' => 0,
+          ]);
 
           $creditor_id = $form->_submitValues['user_name'];
           $test_creditor_id = $form->_submitValues['test_user_name'];
@@ -294,57 +280,41 @@ function sepapp_civicrm_postSave_civicrm_contribution($dao) {
 }
 
 /**
- * Will install the SEPA payment processor
+ * Will install the SEPA payment processor.
  */
 function sepapp_civicrm_enable() {
   _sepapp_civix_civicrm_enable();
 }
 
 /**
- * Will disable the SEPA payment processor
+ * Will disable the SEPA payment processor.
  */
 function sepapp_civicrm_disable() {
   // get payment processor...
   $type_ids = [];
-  $sdd_pp_types = civicrm_api3(
-    'PaymentProcessorType',
-    'get',
-    [
-      'name' => ['IN' => [PP_SDD_PROCESSOR_TYPE, PP_SDD_PROCESSOR_TYPE_NEW]],
-    ]
-  );
+  $sdd_pp_types = civicrm_api3('PaymentProcessorType', 'get', [
+    'name' => ['IN' => [PP_SDD_PROCESSOR_TYPE, PP_SDD_PROCESSOR_TYPE_NEW]],
+  ]);
   foreach ($sdd_pp_types['values'] as $sdd_pp_type) {
     if ($sdd_pp_type['is_active']) {
       $type_ids[] = $sdd_pp_type['id'];
-      $result = civicrm_api3(
-        'PaymentProcessorType',
-        'create',
-        [
-          'id' => $sdd_pp_type['id'],
-          'is_active' => 0,
-        ]
-      );
+      $result = civicrm_api3('PaymentProcessorType', 'create', [
+        'id' => $sdd_pp_type['id'],
+        'is_active' => 0,
+      ]);
     }
   }
 
   // set instances to dummy
   if (!empty($type_ids)) {
-    $sdd_pps = civicrm_api3(
-      'PaymentProcessor',
-      'get',
-      [
-        'payment_processor_type_id' => ['IN' => $type_ids],
-      ]
-    );
+    $sdd_pps = civicrm_api3('PaymentProcessor', 'get', [
+      'payment_processor_type_id' => ['IN' => $type_ids],
+    ]);
     foreach ($sdd_pps['values'] as $sdd_pp) {
-      civicrm_api3(
-        'PaymentProcessor',
-        'create',
-        [
-          'id' => $sdd_pp['id'],
-          'class_name' => 'Payment_Dummy',
-        ]
-      );
+      civicrm_api3('PaymentProcessor', 'create', [
+        'id' => $sdd_pp['id'],
+        'class_name' => 'Payment_Dummy',
+      ]);
     }
   }
 }
@@ -379,31 +349,3 @@ function sepapp_civicrm_config(&$config) {
 function sepapp_civicrm_install() {
   _sepapp_civix_civicrm_install();
 }
-
-// --- Functions below this ship commented out. Uncomment as required. ---
-
-/**
- * Implements hook_civicrm_preProcess().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_preProcess
- *
- * function sepapp_civicrm_preProcess($formName, &$form) {
- *
- * } // */
-
-/**
- * Implements hook_civicrm_navigationMenu().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_navigationMenu
- *
- * function sepapp_civicrm_navigationMenu(&$menu) {
- * _sepapp_civix_insert_navigation_menu($menu, 'Mailings', array(
- * 'label' => E::ts('New subliminal message'),
- * 'name' => 'mailing_subliminal_message',
- * 'url' => 'civicrm/mailing/subliminal',
- * 'permission' => 'access CiviMail',
- * 'operator' => 'OR',
- * 'separator' => 0,
- * ));
- * _sepapp_civix_navigationMenu($menu);
- * } // */
