@@ -212,8 +212,7 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment {
     CRM_Utils_Hook::alterPaymentProcessorParams($this, $original_parameters, $params);
 
     // create the mandate
-    $params['version'] = 3;
-    $mandate = civicrm_api('SepaMandate', 'create', $params);
+    $mandate = civicrm_api3('SepaMandate', 'create', $params);
     if (!empty($mandate['is_error'])) {
       return CRM_Core_Error::createError(E::ts("Couldn't create SEPA mandate. Error was: ", ['domain' => 'org.project60.sepapp']) . $mandate['error_message']);
     }
@@ -257,15 +256,13 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment {
   public static function processPartialMandates() {
     // load all the PARTIAL mandates
     $partial_mandates = civicrm_api3('SepaMandate', 'get', [
-        'version' => 3,
         'status' => 'PARTIAL',
         'option.limit' => 9999,
       ]);
     foreach ($partial_mandates['values'] as $mandate_id => $mandate) {
       if ($mandate['type'] == 'OOFF') {
         // in the OOFF case, we need to find the contribution, and connect it
-        $contribution = civicrm_api('Contribution', 'getsingle', [
-            'version' => 3,
+        $contribution = civicrm_api3('Contribution', 'getsingle', [
             'trxn_id' => $mandate['reference'],
           ]);
         if (empty($contribution['is_error'])) {
@@ -312,12 +309,10 @@ class CRM_Core_Payment_SDD extends CRM_Core_Payment {
         // in the RCUR case, we also need to find the contribution, and connect it
 
         // load the contribution AND the associated recurring contribution
-        $contribution = civicrm_api('Contribution', 'getsingle', [
-            'version' => 3,
+        $contribution = civicrm_api3('Contribution', 'getsingle', [
             'trxn_id' => $mandate['reference'],
           ]);
-        $rcontribution = civicrm_api('ContributionRecur', 'getsingle', [
-            'version' => 3,
+        $rcontribution = civicrm_api3('ContributionRecur', 'getsingle', [
             'trxn_id' => $mandate['reference'],
           ]);
         if (empty($contribution['is_error']) && empty($rcontribution['is_error'])) {
