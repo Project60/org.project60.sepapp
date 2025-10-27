@@ -112,7 +112,7 @@ function sepapp_civicrm_buildForm($formName, &$form)
         }
     } elseif ($formName == "CRM_Contribute_Form_Contribution_Confirm") {                    // PAYMENT PROCESS CONFIRMATION PAGE
         // check if the PP is ours
-        $pp_id = CRM_Utils_Array::value('payment_processor', $form->_params);
+        $pp_id = $form->_params['payment_processor'] ?? NULL;
         if (empty($pp_id)) {
             // there is no payment processor?
             return;
@@ -161,7 +161,7 @@ function sepapp_civicrm_buildForm($formName, &$form)
         );
     } elseif ($formName == "CRM_Contribute_Form_Contribution_ThankYou") {                    // PAYMENT PROCESS THANK YOU PAGE
         // check if the PP is ours
-        $pp_id = CRM_Utils_Array::value('payment_processor', $form->_params);
+        $pp_id = $form->_params['payment_processor'] ?? NULL;
         if (empty($pp_id)) {
             // there is no payment processor?
             return;
@@ -180,18 +180,18 @@ function sepapp_civicrm_buildForm($formName, &$form)
             $creditor      = civicrm_api3('SepaCreditor', 'getsingle', array('id' => $mandate['creditor_id']));
             $contribution  = civicrm_api3('Contribution', 'getsingle', array('trxn_id' => $mandate_reference));
             $rcontribution = array(
-                'cycle_day'          => CRM_Utils_Array::value('cycle_day', $form->_params),
-                'frequency_interval' => CRM_Utils_Array::value('frequency_interval', $form->_params),
-                'frequency_unit'     => CRM_Utils_Array::value('frequency_unit', $form->_params),
-                'start_date'         => CRM_Utils_Array::value('start_date', $form->_params)
+                'cycle_day'          => $form->_params['cycle_day'] ?? NULL,
+                'frequency_interval' => $form->_params['frequency_interval'] ?? NULL,
+                'frequency_unit'     => $form->_params['frequency_unit'] ?? NULL,
+                'start_date'         => $form->_params['start_date'] ?? NULL
             );
 
             $form->assign('mandate_reference', $mandate_reference);
             $form->assign("bank_account_number", $mandate["iban"]);
             $form->assign("bank_identification_number", $mandate["bic"]);
-            $form->assign("collection_day", CRM_Utils_Array::value('cycle_day', $form->_params));
-            $form->assign("frequency_interval", CRM_Utils_Array::value('frequency_interval', $form->_params));
-            $form->assign("frequency_unit", CRM_Utils_Array::value('frequency_unit', $form->_params));
+            $form->assign("collection_day", $form->_params['cycle_day'] ?? NULL);
+            $form->assign("frequency_interval", $form->_params['frequency_interval'] ?? NULL);
+            $form->assign("frequency_unit", $form->_params['frequency_unit'] ?? NULL);
             $form->assign("creditor_id", $creditor['identifier']);
             $form->assign("collection_date", $contribution['receive_date']);
             $form->assign("cycle", CRM_Sepa_Logic_Batching::getCycle($rcontribution));
