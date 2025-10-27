@@ -46,9 +46,11 @@ class CRM_Core_Payment_SDDNGPostProcessor implements API_Wrapper {
   }
 
   /**
-   * Create a pending mandate for a contribution created by a SDD payment processor
+   * Create a pending mandate for a contribution created by a SDD payment
+   * processor
    *
    * @param $contribution_id integer   the freshly created contribution
+   *
    * @todo: react on component
    * @todo: remove financial transactions
    *
@@ -60,129 +62,86 @@ class CRM_Core_Payment_SDDNGPostProcessor implements API_Wrapper {
       $contribution_id = CRM_Core_Payment_SDDNG::getPendingContributionID();
     }
 
-    CRM_Sepapp_Configuration::log(
-        "createPendingMandate for contribution ID [{$contribution_id}]",
-        CRM_Sepapp_Configuration::LOG_LEVEL_DEBUG
-    );
+    CRM_Sepapp_Configuration::log("createPendingMandate for contribution ID [{$contribution_id}]", CRM_Sepapp_Configuration::LOG_LEVEL_DEBUG);
 
     // get pending mandate data (and mark as processed)
     $params = CRM_Core_Payment_SDDNG::releasePendingMandateData($contribution_id);
     if (!$params) {
       // nothing pending for us...
-      CRM_Sepapp_Configuration::log(
-        "createPendingMandate had nothing to do",
-        CRM_Sepapp_Configuration::LOG_LEVEL_DEBUG
-      );
+      CRM_Sepapp_Configuration::log("createPendingMandate had nothing to do", CRM_Sepapp_Configuration::LOG_LEVEL_DEBUG);
       return;
     }
 
     // CREATE OOFF CONTRIBUTION
     // load contribution
-    $contribution = civicrm_api3('Contribution', 'getsingle', array('id' => $contribution_id));
+    $contribution = civicrm_api3('Contribution', 'getsingle', ['id' => $contribution_id]);
 
     // load payment processor
-    $payment_processor = civicrm_api3(
-        'PaymentProcessor',
-        'getsingle',
-        array(
-          'id'     => $params['payment_processor_id'],
-          'return' => 'user_name',
-        )
-    );
+    $payment_processor = civicrm_api3('PaymentProcessor', 'getsingle', [
+      'id' => $params['payment_processor_id'],
+      'return' => 'user_name',
+    ]);
 
     // load creditor
     $creditor_id = (int) ($payment_processor['user_name'] ?? 0);
     if (!$creditor_id) {
-      CRM_Sepapp_Configuration::log(
-        "No creditor found for PaymentProcessor [{$payment_processor['id']}]",
-        CRM_Sepapp_Configuration::LOG_LEVEL_ERROR
-      );
+      CRM_Sepapp_Configuration::log("No creditor found for PaymentProcessor [{$payment_processor['id']}]", CRM_Sepapp_Configuration::LOG_LEVEL_ERROR);
       return;
     }
-    $creditor = civicrm_api3('SepaCreditor', 'get', array('id' => $creditor_id));
+    $creditor = civicrm_api3('SepaCreditor', 'get', ['id' => $creditor_id]);
 
     if (empty($params['contributionRecurID'])) {
       // OOFF Donation:
       // create mandate
-      CRM_Sepapp_Configuration::log(
-        "createPendingMandate creating OOFF mandate",
-        CRM_Sepapp_Configuration::LOG_LEVEL_INFO
-      );
-      $mandate = civicrm_api3(
-        'SepaMandate',
-        'create',
-        array(
-          'creditor_id'     => $creditor['id'],
-          'type'            => 'OOFF',
-          'iban'            => $params['iban'],
-          'bic'             => $params['bic'],
-          'status'          => 'OOFF',
-          'entity_table'    => 'civicrm_contribution',
-          'entity_id'       => $contribution_id,
-          'contact_id'      => $contribution['contact_id'],
-          'campaign_id'     => $contribution['campaign_id'] ?? NULL,
-          'currency'        => $creditor['currency'] ?? 'EUR',
-          'date'            => date('YmdHis'),
-          'creation_date'   => date('YmdHis'),
-          'validation_date' => date('YmdHis'),
-          'source'          => substr($contribution['contribution_source'], 0, 64),
-        )
-      );
-      CRM_Sepapp_Configuration::log(
-        "OOFF mandate [{$mandate['id']}] created.",
-        CRM_Sepapp_Configuration::LOG_LEVEL_AUDIT
-      );
+      CRM_Sepapp_Configuration::log("createPendingMandate creating OOFF mandate", CRM_Sepapp_Configuration::LOG_LEVEL_INFO);
+      $mandate = civicrm_api3('SepaMandate', 'create', [
+        'creditor_id' => $creditor['id'],
+        'type' => 'OOFF',
+        'iban' => $params['iban'],
+        'bic' => $params['bic'],
+        'status' => 'OOFF',
+        'entity_table' => 'civicrm_contribution',
+        'entity_id' => $contribution_id,
+        'contact_id' => $contribution['contact_id'],
+        'campaign_id' => $contribution['campaign_id'] ?? NULL,
+        'currency' => $creditor['currency'] ?? 'EUR',
+        'date' => date('YmdHis'),
+        'creation_date' => date('YmdHis'),
+        'validation_date' => date('YmdHis'),
+        'source' => substr($contribution['contribution_source'], 0, 64),
+      ]);
+      CRM_Sepapp_Configuration::log("OOFF mandate [{$mandate['id']}] created.", CRM_Sepapp_Configuration::LOG_LEVEL_AUDIT);
 
       // reset contribution to 'Pending'
-      $ooff_payment = (int) CRM_Core_PseudoConstant::getKey(
-        'CRM_Contribute_BAO_Contribution',
-        'payment_instrument_id',
-        'OOFF'
-      );
+      $ooff_payment = (int) CRM_Core_PseudoConstant::getKey('CRM_Contribute_BAO_Contribution', 'payment_instrument_id', 'OOFF');
       self::resetContribution($contribution_id, $ooff_payment);
-      CRM_Sepapp_Configuration::log(
-        "Contribution [{$contribution_id}] adjusted.",
-        CRM_Sepapp_Configuration::LOG_LEVEL_AUDIT
-      );
+      CRM_Sepapp_Configuration::log("Contribution [{$contribution_id}] adjusted.", CRM_Sepapp_Configuration::LOG_LEVEL_AUDIT);
     }
     else {
       // RECURRING DONATION
       // create mandate
-      CRM_Sepapp_Configuration::log(
-        "createPendingMandate creating RCUR mandate",
-        CRM_Sepapp_Configuration::LOG_LEVEL_INFO
-      );
-      $mandate = civicrm_api3(
-        'SepaMandate',
-        'create',
-        array(
-          'creditor_id'     => $creditor['id'],
-          'type'            => 'RCUR',
-          'iban'            => $params['iban'],
-          'bic'             => $params['bic'],
-          'status'          => 'FRST',
-          'entity_table'    => 'civicrm_contribution_recur',
-          'entity_id'       => $params['contributionRecurID'],
-          'contact_id'      => $contribution['contact_id'],
-          'campaign_id'     => $contribution['campaign_id'] ?? NULL,
-          'currency'        => $creditor['currency'] ?? 'EUR',
-          'date'            => date('YmdHis'),
-          'creation_date'   => date('YmdHis'),
-          'validation_date' => date('YmdHis'),
-          'source'          => substr($contribution['contribution_source'], 0, 64),
-        )
-      );
-      CRM_Sepapp_Configuration::log(
-        "RCUR mandate [{$mandate['id']}] created.",
-        CRM_Sepapp_Configuration::LOG_LEVEL_AUDIT
-      );
+      CRM_Sepapp_Configuration::log("createPendingMandate creating RCUR mandate", CRM_Sepapp_Configuration::LOG_LEVEL_INFO);
+      $mandate = civicrm_api3('SepaMandate', 'create', [
+        'creditor_id' => $creditor['id'],
+        'type' => 'RCUR',
+        'iban' => $params['iban'],
+        'bic' => $params['bic'],
+        'status' => 'FRST',
+        'entity_table' => 'civicrm_contribution_recur',
+        'entity_id' => $params['contributionRecurID'],
+        'contact_id' => $contribution['contact_id'],
+        'campaign_id' => $contribution['campaign_id'] ?? NULL,
+        'currency' => $creditor['currency'] ?? 'EUR',
+        'date' => date('YmdHis'),
+        'creation_date' => date('YmdHis'),
+        'validation_date' => date('YmdHis'),
+        'source' => substr($contribution['contribution_source'], 0, 64),
+      ]);
+      CRM_Sepapp_Configuration::log("RCUR mandate [{$mandate['id']}] created.", CRM_Sepapp_Configuration::LOG_LEVEL_AUDIT);
 
       // reset recurring contribution
       self::updateRecurringContribution($params, $creditor['id'], $contribution);
-      CRM_Sepapp_Configuration::log(
-        "Recurring contribution [{$params['contributionRecurID']}] adjusted.",
-        CRM_Sepapp_Configuration::LOG_LEVEL_AUDIT
-      );
+      CRM_Sepapp_Configuration::log("Recurring contribution [{$params['contributionRecurID']}] adjusted.", CRM_Sepapp_Configuration::LOG_LEVEL_AUDIT);
 
       // finally: delete contribution
       civicrm_api3('Contribution', 'delete', ['id' => $contribution_id]);
@@ -196,72 +155,50 @@ class CRM_Core_Payment_SDDNGPostProcessor implements API_Wrapper {
    * @param $payment_instrument_id int Payment Instrument to set
    */
   public static function resetContribution($contribution_id, $payment_instrument_id) {
-    CRM_Sepapp_Configuration::log(
-        "resetContribution [{$contribution_id}/{$payment_instrument_id}]",
-        CRM_Sepapp_Configuration::LOG_LEVEL_DEBUG
-    );
+    CRM_Sepapp_Configuration::log("resetContribution [{$contribution_id}/{$payment_instrument_id}]", CRM_Sepapp_Configuration::LOG_LEVEL_DEBUG);
     // update contribution... this can be tricky
-    $status_pending = (int) CRM_Core_PseudoConstant::getKey(
-        'CRM_Contribute_BAO_Contribution',
-        'contribution_status_id',
-        'Pending'
-    );
+    $status_pending = (int) CRM_Core_PseudoConstant::getKey('CRM_Contribute_BAO_Contribution', 'contribution_status_id', 'Pending');
     try {
-      civicrm_api3(
-        'Contribution',
-        'create',
-        array(
-      // avoid overhead
-          'skipRecentView'         => 1,
-          'id'                     => $contribution_id,
-          'contribution_status_id' => $status_pending,
-          'payment_instrument_id'  => $payment_instrument_id,
-        )
-      );
+      civicrm_api3('Contribution', 'create', [
+          // avoid overhead
+        'skipRecentView' => 1,
+        'id' => $contribution_id,
+        'contribution_status_id' => $status_pending,
+        'payment_instrument_id' => $payment_instrument_id,
+      ]);
     }
     catch (Exception $ex) {
       // that's not good... but we can't leave it like this...
       $error_message = $ex->getMessage();
-      CRM_Sepapp_Configuration::log(
-        "SDD reset contribution via API failed ('{$error_message}'), using SQL...",
-        CRM_Sepapp_Configuration::LOG_LEVEL_INFO
-        );
-      CRM_Core_DAO::executeQuery(
-            "UPDATE civicrm_contribution SET contribution_status_id = %1, payment_instrument_id = %2 WHERE id = %3;",
-            array(
-              1 => array($status_pending, 'Integer'),
-              2 => array($payment_instrument_id, 'Integer'),
-              3 => array($contribution_id, 'Integer'),
-            )
-        );
+      CRM_Sepapp_Configuration::log("SDD reset contribution via API failed ('{$error_message}'), using SQL...", CRM_Sepapp_Configuration::LOG_LEVEL_INFO);
+      CRM_Core_DAO::executeQuery("UPDATE civicrm_contribution SET contribution_status_id = %1, payment_instrument_id = %2 WHERE id = %3;", [
+        1 => [$status_pending, 'Integer'],
+        2 => [$payment_instrument_id, 'Integer'],
+        3 => [$contribution_id, 'Integer'],
+      ]);
     }
 
     // delete all finacial transactions
-    CRM_Core_DAO::executeQuery(
-        "
+    CRM_Core_DAO::executeQuery("
       DELETE FROM civicrm_financial_trxn
       WHERE id IN (SELECT etx.financial_trxn_id 
                    FROM civicrm_entity_financial_trxn etx 
                    WHERE etx.entity_id = %1
-                     AND etx.entity_table = 'civicrm_contribution');",
-      [
-        1 => [$contribution_id, 'Integer'],
-      ]
-    );
+                     AND etx.entity_table = 'civicrm_contribution');", [
+                       1 => [$contribution_id, 'Integer'],
+                     ]);
   }
 
   /**
    * Tries to undo some of the stuff done to the recurring contribution
    *
-   * @param array $params         All params containing installments, contributionRecurID, frequency_interval, frequency_unit
-   * @param int $creditor         The creditor ID
-   * @param array $contribution   The ContributionRecur
+   * @param array $params All params containing installments,
+   *   contributionRecurID, frequency_interval, frequency_unit
+   * @param int $creditor The creditor ID
+   * @param array $contribution The ContributionRecur
    */
   public static function updateRecurringContribution($params, $creditor, $contribution) {
-    CRM_Sepapp_Configuration::log(
-        "resetContribution [{$contribution['id']}]",
-        CRM_Sepapp_Configuration::LOG_LEVEL_DEBUG
-    );
+    CRM_Sepapp_Configuration::log("resetContribution [{$contribution['id']}]", CRM_Sepapp_Configuration::LOG_LEVEL_DEBUG);
 
     // calculate start_date
     $start_date = self::getNextPossibleCollectionDate($creditor);
@@ -283,53 +220,36 @@ class CRM_Core_Payment_SDDNGPostProcessor implements API_Wrapper {
 
     // update recurring contribution
     $contribution_recur_id = (int) $params['contributionRecurID'];
-    $status_pending        = (int) CRM_Core_PseudoConstant::getKey(
-        'CRM_Contribute_BAO_Contribution',
-        'contribution_status_id',
-        'Pending'
-    );
-    $payment_instrument_id = (int) CRM_Core_PseudoConstant::getKey(
-        'CRM_Contribute_BAO_Contribution',
-        'payment_instrument_id',
-        'RCUR'
-    );
+    $status_pending = (int) CRM_Core_PseudoConstant::getKey('CRM_Contribute_BAO_Contribution', 'contribution_status_id', 'Pending');
+    $payment_instrument_id = (int) CRM_Core_PseudoConstant::getKey('CRM_Contribute_BAO_Contribution', 'payment_instrument_id', 'RCUR');
 
     try {
-      civicrm_api3(
-        'ContributionRecur',
-        'create',
-        array(
-      // avoid overhead
-          'skipRecentView'         => 1,
-          'id'                     => $contribution_recur_id,
-          'contribution_status_id' => $status_pending,
-          'payment_instrument_id'  => $payment_instrument_id,
-          'start_date'             => $start_date,
-          'cycle_day'              => date('j', strtotime($start_date)),
-          'end_date'               => $end_date,
-        )
-      );
+      civicrm_api3('ContributionRecur', 'create', [
+          // avoid overhead
+        'skipRecentView' => 1,
+        'id' => $contribution_recur_id,
+        'contribution_status_id' => $status_pending,
+        'payment_instrument_id' => $payment_instrument_id,
+        'start_date' => $start_date,
+        'cycle_day' => date('j', strtotime($start_date)),
+        'end_date' => $end_date,
+      ]);
     }
     catch (Exception $ex) {
       // that's not good... but we can't leave it like this...
       $error_message = $ex->getMessage();
-      CRM_Sepapp_Configuration::log(
-        "SDD reset contribution via API failed ('{$error_message}'), using SQL...",
-        CRM_Sepapp_Configuration::LOG_LEVEL_INFO
-        );
-      CRM_Core_DAO::executeQuery(
-            "UPDATE civicrm_contribution_recur SET contribution_status_id = %1, payment_instrument_id = %2 WHERE id = %3;",
-            array(
-              1 => array($status_pending, 'Integer'),
-              2 => array($payment_instrument_id, 'Integer'),
-              3 => array($contribution_recur_id, 'Integer'),
-            )
-        );
+      CRM_Sepapp_Configuration::log("SDD reset contribution via API failed ('{$error_message}'), using SQL...", CRM_Sepapp_Configuration::LOG_LEVEL_INFO);
+      CRM_Core_DAO::executeQuery("UPDATE civicrm_contribution_recur SET contribution_status_id = %1, payment_instrument_id = %2 WHERE id = %3;", [
+        1 => [$status_pending, 'Integer'],
+        2 => [$payment_instrument_id, 'Integer'],
+        3 => [$contribution_recur_id, 'Integer'],
+      ]);
     }
   }
 
   /**
-   * Calculate the next possible collection date, based solely on the creditor ID.
+   * Calculate the next possible collection date, based solely on the creditor
+   * ID.
    *
    * @param $creditor_id
    * @param $now
@@ -337,9 +257,9 @@ class CRM_Core_Payment_SDDNGPostProcessor implements API_Wrapper {
    * @return string
    */
   public static function getNextPossibleCollectionDate($creditor_id, $now = 'now') {
-    $buffer_days      = (int) CRM_Sepa_Logic_Settings::getGenericSetting('pp_buffer_days');
+    $buffer_days = (int) CRM_Sepa_Logic_Settings::getGenericSetting('pp_buffer_days');
     $frst_notice_days = (int) CRM_Sepa_Logic_Settings::getSetting("batching.FRST.notice", $creditor_id);
-    $cycle_days       = CRM_Sepa_Logic_Settings::getListSetting("cycledays", range(1, 28), $creditor_id);
+    $cycle_days = CRM_Sepa_Logic_Settings::getListSetting("cycledays", range(1, 28), $creditor_id);
 
     $earliest_date = strtotime("+{$buffer_days} days +{$frst_notice_days} days", strtotime($now));
     while (!in_array(date('j', $earliest_date), $cycle_days)) {
