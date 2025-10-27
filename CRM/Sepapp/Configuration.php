@@ -18,31 +18,30 @@
 /**
  * SEPA_Direct_Debit payment processor configuration
  */
-class CRM_Sepapp_Configuration
-{
+class CRM_Sepapp_Configuration {
 
-    const LOG_LEVEL_DEBUG = 0;
-    const LOG_LEVEL_AUDIT = 5;
-    const LOG_LEVEL_INFO = 10;
-    const LOG_LEVEL_ERROR = 20;
+  const LOG_LEVEL_DEBUG = 0;
+  const LOG_LEVEL_AUDIT = 5;
+  const LOG_LEVEL_INFO = 10;
+  const LOG_LEVEL_ERROR = 20;
 
-    static protected $LOG_LEVEL = self::LOG_LEVEL_AUDIT;
+  static protected $LOG_LEVEL = self::LOG_LEVEL_AUDIT;
 
-    /**
-     * Log messages
-     *
-     * @param $message  string log message
-     * @param $level    int log level, see constants
-     */
-    public static function log($message, $level = self::LOG_LEVEL_AUDIT)
-    {
-        if ($level >= self::$LOG_LEVEL) {
-            if ($level == self::LOG_LEVEL_ERROR) {
-              Civi::log()->error("SepaPP: " . $message);
-            }
-            else {
-              Civi::log()->debug("SepaPP: " . $message);
-            }
-        }
+  /**
+   * Log messages
+   *
+   * @param $message  string log message
+   * @param $level    int log level, see constants
+   */
+  public static function log($message, $level = self::LOG_LEVEL_AUDIT) {
+    if ($level >= self::$LOG_LEVEL) {
+      if ($level == self::LOG_LEVEL_ERROR) {
+        Civi::log()->error("SepaPP: " . $message);
+      }
+      else {
+        Civi::log()->debug("SepaPP: " . $message);
+      }
     }
+  }
+
 }
