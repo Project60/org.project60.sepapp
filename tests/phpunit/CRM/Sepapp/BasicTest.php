@@ -6,31 +6,36 @@ use Civi\Test\HeadlessInterface;
 use Civi\Test\HookInterface;
 use Civi\Test\TransactionalInterface;
 
-use CRM_Core_Payment_SDD;
-
 /**
- * FIXME - Add test description.
+ * Very simple function test.
  *
  * Tips:
- *  - With HookInterface, you may implement CiviCRM hooks directly in the test class.
- *    Simply create corresponding functions (e.g. "hook_civicrm_post(...)" or similar).
- *  - With TransactionalInterface, any data changes made by setUp() or test****() functions will
- *    rollback automatically -- as long as you don't manipulate schema or truncate tables.
- *    If this test needs to manipulate schema or truncate tables, then either:
- *       a. Do all that using setupHeadless() and Civi\Test.
- *       b. Disable TransactionalInterface, and handle all setup/teardown yourself.
+ *  - With HookInterface, you may implement CiviCRM hooks directly in the test
+ * class. Simply create corresponding functions (e.g. "hook_civicrm_post(...)"
+ * or similar).
+ *  - With TransactionalInterface, any data changes made by setUp() or
+ * test****() functions will rollback automatically -- as long as you don't
+ * manipulate schema or truncate tables. If this test needs to manipulate
+ * schema or truncate tables, then either: a. Do all that using setupHeadless()
+ * and Civi\Test. b. Disable TransactionalInterface, and handle all
+ * setup/teardown yourself.
  *
  * @group headless
  */
 class CRM_Sepapp_BasicTest extends \PHPUnit\Framework\TestCase implements HeadlessInterface, TransactionalInterface {
+
   const FORCE_REBUILD = FALSE;
 
   const TEST_IBAN = "DE88100900001234567892";
 
+  /** @var int The ID of the NG payment processor created in setUp */
+  protected $ngPaymentProcessorId;
+
   /**
    * Setup used when HeadlessInterface is implemented.
    *
-   * Civi\Test has many helpers, like install(), uninstall(), sql(), and sqlFile().
+   * Civi\Test has many helpers, like install(), uninstall(), sql(), and
+   * sqlFile().
    *
    * @link https://github.com/civicrm/org.civicrm.testapalooza/blob/master/civi-test.md
    *
@@ -45,14 +50,13 @@ class CRM_Sepapp_BasicTest extends \PHPUnit\Framework\TestCase implements Headle
       ->apply(self::FORCE_REBUILD);
   }
 
-  public function setUp():void {
+  public function setUp(): void {
     parent::setUp();
 
-    #$this->createBasicConfiguration();
+    $this->ngPaymentProcessorId = $this->createBasicConfiguration();
   }
 
-  public function createBasicConfiguration()
-  {
+  public function createBasicConfiguration() {
     $pp = [
       "domain_id" => 1,
       "name" => "SEPA Lastschrift NG",
@@ -69,14 +73,19 @@ class CRM_Sepapp_BasicTest extends \PHPUnit\Framework\TestCase implements Headle
       "payment_type" => 2,
       "payment_instrument_id" => 3,
     ];
-    $paymentProcessors = \Civi\Api4\PaymentProcessor::create(FALSE)->setValues($pp)->execute()->first();
-    #dump($paymentProcessors);
+    $paymentProcessors = \Civi\Api4\PaymentProcessor::create(FALSE)
+      ->setValues($pp)
+      ->execute()
+      ->first();
+    $ngPaymentProcessorId = $paymentProcessors['id'];
 
     $pp['name'] = "SEPA Lastschrift";
     $pp['payment_processor_type_id'] = 9; // legacy
     $pp['class_name'] = "Payment_SDD";
-    $paymentProcessors = \Civi\Api4\PaymentProcessor::create(FALSE)->setValues($pp)->execute()->first();
-    #dump($paymentProcessors);
+    $paymentProcessors = \Civi\Api4\PaymentProcessor::create(FALSE)
+      ->setValues($pp)
+      ->execute()
+      ->first();
 
     $sepaCreditor = \Civi\Api4\SepaCreditor::create(FALSE)->setValues(
       [
@@ -98,17 +107,18 @@ class CRM_Sepapp_BasicTest extends \PHPUnit\Framework\TestCase implements Headle
         "uses_bic" => FALSE,
       ]
     )->execute()->first();
-    #dump($sepaCreditor);
+
+    return $ngPaymentProcessorId;
   }
 
-  public function tearDown():void {
+  public function tearDown(): void {
     parent::tearDown();
   }
 
   /**
    * Example: Test that a version is returned.
    */
-  public function testWellFormedVersion():void {
+  public function testWellFormedVersion(): void {
     $this->assertNotEmpty(E::SHORT_NAME);
     $this->assertMatchesRegularExpression('/^([0-9\.]|alpha|beta)*$/', \CRM_Utils_System::version());
   }
@@ -116,7 +126,7 @@ class CRM_Sepapp_BasicTest extends \PHPUnit\Framework\TestCase implements Headle
   /**
    * Example: Test that we're using a fake CMS.
    */
-  public function testWellFormedUF():void {
+  public function testWellFormedUF(): void {
     $this->assertEquals('UnitTests', CIVICRM_UF);
   }
 
@@ -130,9 +140,10 @@ class CRM_Sepapp_BasicTest extends \PHPUnit\Framework\TestCase implements Headle
     // set test data
     CRM_Core_Payment_SDDNG::setPendingMandateData(
       [
-        'payment_processor_id' => 1,
+        'payment_processor_id' => $this->ngPaymentProcessorId,
         'iban' => self::TEST_IBAN,
         'bic' => "BEVODEBB",
+        'contribution_id' => $res['id'],
       ]
     );
 
@@ -143,24 +154,22 @@ class CRM_Sepapp_BasicTest extends \PHPUnit\Framework\TestCase implements Headle
       ->execute()->first();
     $this->assertNotEmpty($sepaMandates);
     $this->assertEquals(self::TEST_IBAN, $sepaMandates['iban']);
-    $this->assertEquals('TEST '. $test_id, $sepaMandates['source']);
+    $this->assertEquals('TEST ' . $test_id, $sepaMandates['source']);
   }
 
   public function createTestContribution(string $name): array {
     return \Civi\API4\Contribution::create(FALSE)->setValues(
       [
-          'contact_id' => 1,
-          'trxn_id' => 'TEST-TRX-' . $name . '-' . md5(microtime() . mt_rand()),
-          'receive_date' => '01.04.2025',
-          'total_amount' => '100.00',
-          'currency' => 'EUR',
-          'contribution_source' => 'TEST ' . $name,
-          'financial_type_id' => 2,
-          'payment_instrument_id' => 1,
+        'contact_id' => 1,
+        'trxn_id' => 'TEST-TRX-' . $name . '-' . md5(microtime() . mt_rand()),
+        'receive_date' => '01.04.2025',
+        'total_amount' => '100.00',
+        'currency' => 'EUR',
+        'contribution_source' => 'TEST ' . $name,
+        'financial_type_id' => 2,
+        'payment_instrument_id' => 1,
       ]
     )->execute()->first();
   }
 
 }
-
-
