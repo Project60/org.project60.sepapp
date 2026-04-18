@@ -1,32 +1,30 @@
 <?php
 
-use CRM_Sepapp_ExtensionUtil as E;
+require_once dirname(__DIR__) . '/Sepapp/ConfigurationTrait.php';
+
 use Civi\Test\CiviEnvBuilder;
 use Civi\Test\HeadlessInterface;
-use Civi\Test\HookInterface;
 use Civi\Test\TransactionalInterface;
 
 /**
- * Very simple function test.
+ * FIXME - Add test description.
  *
  * Tips:
- *  - With HookInterface, you may implement CiviCRM hooks directly in the test
- * class. Simply create corresponding functions (e.g. "hook_civicrm_post(...)"
- * or similar).
- *  - With TransactionalInterface, any data changes made by setUp() or
- * test****() functions will rollback automatically -- as long as you don't
- * manipulate schema or truncate tables. If this test needs to manipulate
- * schema or truncate tables, then either: a. Do all that using setupHeadless()
- * and Civi\Test. b. Disable TransactionalInterface, and handle all
- * setup/teardown yourself.
+ *  - With HookInterface, you may implement CiviCRM hooks directly in the test class.
+ *    Simply create corresponding functions (e.g. "hook_civicrm_post(...)" or similar).
+ *  - With TransactionalInterface, any data changes made by setUp() or test****() functions will
+ *    rollback automatically -- as long as you don't manipulate schema or truncate tables.
+ *    If this test needs to manipulate schema or truncate tables, then either:
+ *       a. Do all that using setupHeadless() and Civi\Test.
+ *       b. Disable TransactionalInterface, and handle all setup/teardown yourself.
  *
  * @group headless
  */
 class CRM_Sepapp_BasicTest extends \PHPUnit\Framework\TestCase implements HeadlessInterface, TransactionalInterface {
 
-  const FORCE_REBUILD = FALSE;
+  use CRM_Sepapp_ConfigurationTrait;
 
-  const TEST_IBAN = "DE88100900001234567892";
+  const FORCE_REBUILD = FALSE;
 
   /** @var int The ID of the NG payment processor created in setUp */
   protected $ngPaymentProcessorId;
@@ -34,8 +32,7 @@ class CRM_Sepapp_BasicTest extends \PHPUnit\Framework\TestCase implements Headle
   /**
    * Setup used when HeadlessInterface is implemented.
    *
-   * Civi\Test has many helpers, like install(), uninstall(), sql(), and
-   * sqlFile().
+   * Civi\Test has many helpers, like install(), uninstall(), sql(), and sqlFile().
    *
    * @link https://github.com/civicrm/org.civicrm.testapalooza/blob/master/civi-test.md
    *
@@ -56,62 +53,11 @@ class CRM_Sepapp_BasicTest extends \PHPUnit\Framework\TestCase implements Headle
     $this->ngPaymentProcessorId = $this->createBasicConfiguration();
   }
 
-  public function createBasicConfiguration() {
-    $pp = [
-      "domain_id" => 1,
-      "name" => "SEPA Lastschrift NG",
-      "title" => "SEPA Lastschrift",
-      "frontend_title" => "SEPA Lastschrift",
-      "payment_processor_type_id" => 10, // NG
-      "is_active" => TRUE,
-      "is_default" => TRUE,
-      "is_test" => FALSE,
-      "user_name" => "1",
-      "class_name" => "Payment_SDDNG",
-      "billing_mode" => 1,
-      "is_recur" => TRUE,
-      "payment_type" => 2,
-      "payment_instrument_id" => 3,
-    ];
-    $paymentProcessors = \Civi\Api4\PaymentProcessor::create(FALSE)
-      ->setValues($pp)
-      ->execute()
-      ->first();
-    $ngPaymentProcessorId = $paymentProcessors['id'];
-
-    $pp['name'] = "SEPA Lastschrift";
-    $pp['payment_processor_type_id'] = 9; // legacy
-    $pp['class_name'] = "Payment_SDD";
-    $paymentProcessors = \Civi\Api4\PaymentProcessor::create(FALSE)
-      ->setValues($pp)
-      ->execute()
-      ->first();
-
-    $sepaCreditor = \Civi\Api4\SepaCreditor::create(FALSE)->setValues(
-      [
-        "creditor_id" => 1,
-        "identifier" => "DE02370502990000684712",
-        "name" => "SEPA Lastschrift",
-        "label" => "SEPA Lastschrift",
-        "address" => "Teststraße 1",
-        "country_id" => 1082,
-        "iban" => "DE02370502990000684712",
-        "bic" => "COKSDE33",
-        "mandate_prefix" => "SEPA",
-        "currency" => "EUR",
-        "mandate_active" => TRUE,
-        "sepa_file_format_id" => 12,
-        "creditor_type" => "SEPA",
-        "pi_ooff" => "7",
-        "pi_rcur" => "5-6",
-        "uses_bic" => FALSE,
-      ]
-    )->execute()->first();
-
-    return $ngPaymentProcessorId;
-  }
-
+  /**
+   * Clean up static state after each test.
+   */
   public function tearDown(): void {
+    CRM_Core_Payment_SDDNG::releasePendingMandateData(999);
     parent::tearDown();
   }
 
@@ -119,7 +65,7 @@ class CRM_Sepapp_BasicTest extends \PHPUnit\Framework\TestCase implements Headle
    * Example: Test that a version is returned.
    */
   public function testWellFormedVersion(): void {
-    $this->assertNotEmpty(E::SHORT_NAME);
+    $this->assertNotEmpty(\CRM_Sepapp_ExtensionUtil::SHORT_NAME);
     $this->assertMatchesRegularExpression('/^([0-9\.]|alpha|beta)*$/', \CRM_Utils_System::version());
   }
 
@@ -137,15 +83,12 @@ class CRM_Sepapp_BasicTest extends \PHPUnit\Framework\TestCase implements Headle
     $id = CRM_Core_Payment_SDDNG::getPendingContributionID();
     $this->assertEquals($res['id'], $id, "CRM_Core_Payment_SDDNG::getPendingContributionID");
 
-    // set test data
-    CRM_Core_Payment_SDDNG::setPendingMandateData(
-      [
-        'payment_processor_id' => $this->ngPaymentProcessorId,
-        'iban' => self::TEST_IBAN,
-        'bic' => "BEVODEBB",
-        'contribution_id' => $res['id'],
-      ]
-    );
+    CRM_Core_Payment_SDDNG::setPendingMandateData([
+      'payment_processor_id' => $this->ngPaymentProcessorId,
+      'iban' => self::TEST_IBAN,
+      'bic' => self::TEST_BIC_VALID,
+      'contribution_id' => $res['id'],
+    ]);
 
     CRM_Core_Payment_SDDNGPostProcessor::createPendingMandate();
 
@@ -158,8 +101,7 @@ class CRM_Sepapp_BasicTest extends \PHPUnit\Framework\TestCase implements Headle
   }
 
   public function createTestContribution(string $name): array {
-    return \Civi\API4\Contribution::create(FALSE)->setValues(
-      [
+    return \Civi\API4\Contribution::create(FALSE)->setValues([
         'contact_id' => 1,
         'trxn_id' => 'TEST-TRX-' . $name . '-' . md5(microtime() . mt_rand()),
         'receive_date' => '01.04.2025',
@@ -168,8 +110,7 @@ class CRM_Sepapp_BasicTest extends \PHPUnit\Framework\TestCase implements Headle
         'contribution_source' => 'TEST ' . $name,
         'financial_type_id' => 2,
         'payment_instrument_id' => 1,
-      ]
-    )->execute()->first();
+      ])->execute()->first();
   }
 
 }

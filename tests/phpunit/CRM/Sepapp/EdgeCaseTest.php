@@ -11,8 +11,6 @@ use Civi\Test\HeadlessInterface;
 use Civi\Test\TransactionalInterface;
 use PHPUnit\Framework\TestCase;
 
-use CRM_Sepapp_ExtensionUtil as E;
-
 /**
  * Edge case tests for SEPA payment processors.
  *
@@ -23,13 +21,9 @@ use CRM_Sepapp_ExtensionUtil as E;
  */
 class CRM_Sepapp_EdgeCaseTest extends TestCase implements HeadlessInterface, TransactionalInterface {
 
+  use CRM_Sepapp_ConfigurationTrait;
+
   const FORCE_REBUILD = FALSE;
-
-  const TEST_IBAN = "DE88100900001234567892";
-
-  const INVALID_IBAN = "INVALID123";
-
-  const INVALID_BIC = "INVALID";
 
   /** @var int The ID of the NG payment processor created in setUp */
   protected $ngPaymentProcessorId;
@@ -59,57 +53,12 @@ class CRM_Sepapp_EdgeCaseTest extends TestCase implements HeadlessInterface, Tra
     $this->ngPaymentProcessorId = $this->createBasicConfiguration();
   }
 
-  public function createBasicConfiguration() {
-    $pp = [
-      "domain_id" => 1,
-      "name" => "SEPA Lastschrift NG",
-      "title" => "SEPA Lastschrift",
-      "frontend_title" => "SEPA Lastschrift",
-      "payment_processor_type_id" => 10, // NG
-      "is_active" => TRUE,
-      "is_default" => TRUE,
-      "is_test" => FALSE,
-      "user_name" => "1",
-      "class_name" => "Payment_SDDNG",
-      "billing_mode" => 1,
-      "is_recur" => TRUE,
-      "payment_type" => 2,
-      "payment_instrument_id" => 3,
-    ];
-    $paymentProcessors = PaymentProcessor::create(FALSE)
-      ->setValues($pp)
-      ->execute()
-      ->first();
-    $ngPaymentProcessorId = $paymentProcessors['id'];
-
-    $pp['name'] = "SEPA Lastschrift";
-    $pp['payment_processor_type_id'] = 9; // legacy
-    $pp['class_name'] = "Payment_SDD";
-    $paymentProcessors = PaymentProcessor::create(FALSE)
-      ->setValues($pp)
-      ->execute()
-      ->first();
-
-    $sepaCreditor = SepaCreditor::create(FALSE)->setValues([
-        "creditor_id" => 1,
-        "identifier" => "DE02370502990000684712",
-        "name" => "SEPA Lastschrift",
-        "label" => "SEPA Lastschrift",
-        "address" => "Teststraße 1",
-        "country_id" => 1082,
-        "iban" => "DE02370502990000684712",
-        "bic" => "COKSDE33",
-        "mandate_prefix" => "SEPA",
-        "currency" => "EUR",
-        "mandate_active" => TRUE,
-        "sepa_file_format_id" => 12,
-        "creditor_type" => "SEPA",
-        "pi_ooff" => "7",
-        "pi_rcur" => "5-6",
-        "uses_bic" => FALSE,
-      ])->execute()->first();
-
-    return $ngPaymentProcessorId;
+  /**
+   * Clean up static state after each test.
+   */
+  public function tearDown(): void {
+    CRM_Core_Payment_SDDNG::releasePendingMandateData(999);
+    parent::tearDown();
   }
 
   /**
@@ -122,9 +71,9 @@ class CRM_Sepapp_EdgeCaseTest extends TestCase implements HeadlessInterface, Tra
     $sddng->setPaymentProcessor(['id' => $this->ngPaymentProcessorId]);
 
     $params = [
-      'iban' => self::INVALID_IBAN,
+      'iban' => self::TEST_IBAN_INVALID,
       'bic' => 'TESTBIC1',
-      'bank_account_number' => self::INVALID_IBAN,
+      'bank_account_number' => self::TEST_IBAN_INVALID,
       'bank_identification_number' => 'TESTBIC1',
       'contact_id' => 1,
       'amount' => 100.00,
@@ -145,9 +94,9 @@ class CRM_Sepapp_EdgeCaseTest extends TestCase implements HeadlessInterface, Tra
 
     $params = [
       'iban' => self::TEST_IBAN,
-      'bic' => self::INVALID_BIC,
+      'bic' => self::TEST_BIC_INVALID,
       'bank_account_number' => self::TEST_IBAN,
-      'bank_identification_number' => self::INVALID_BIC,
+      'bank_identification_number' => self::TEST_BIC_INVALID,
       'contact_id' => 1,
       'amount' => 100.00,
       'currency' => 'EUR',
@@ -165,9 +114,9 @@ class CRM_Sepapp_EdgeCaseTest extends TestCase implements HeadlessInterface, Tra
 
     $params = [
       'iban' => self::TEST_IBAN,
-      'bic' => 'BEVODEBB',
+      'bic' => self::TEST_BIC_VALID,
       'bank_account_number' => self::TEST_IBAN,
-      'bank_identification_number' => 'BEVODEBB',
+      'bank_identification_number' => self::TEST_BIC_VALID,
       'contact_id' => 1,
       'amount' => 100.00,
       'currency' => 'EUR',
@@ -177,39 +126,58 @@ class CRM_Sepapp_EdgeCaseTest extends TestCase implements HeadlessInterface, Tra
     $this->assertArrayHasKey('iban', $result);
     $this->assertArrayHasKey('bic', $result);
     $this->assertEquals(self::TEST_IBAN, $result['iban']);
-    $this->assertEquals('BEVODEBB', $result['bic']);
+    $this->assertEquals(self::TEST_BIC_VALID, $result['bic']);
   }
 
   /**
    * Test that pending mandate data is properly stored and retrieved.
    */
   public function testPendingMandateDataStorage(): void {
-    $contributionId = 999;
+    $contributionId = 998;
     $testData = [
       'payment_processor_id' => $this->ngPaymentProcessorId,
       'iban' => self::TEST_IBAN,
-      'bic' => 'BEVODEBB',
+      'bic' => self::TEST_BIC_VALID,
       'contribution_id' => $contributionId,
     ];
 
-    // Store the data
     CRM_Core_Payment_SDDNG::setPendingMandateData($testData);
 
-    // Verify it can be retrieved
     $storedData = CRM_Core_Payment_SDDNG::releasePendingMandateData($contributionId);
 
     $this->assertNotNull($storedData);
     $this->assertEquals($this->ngPaymentProcessorId, $storedData['payment_processor_id']);
     $this->assertEquals(self::TEST_IBAN, $storedData['iban']);
-    $this->assertEquals('BEVODEBB', $storedData['bic']);
+    $this->assertEquals(self::TEST_BIC_VALID, $storedData['bic']);
     $this->assertEquals($contributionId, $storedData['contribution_id']);
+  }
+
+  /**
+   * Test that pending mandate data returns null with mismatched contribution ID.
+   */
+  public function testPendingMandateDataMismatchedId(): void {
+    $contributionId = 998;
+    $wrongId = 888;
+    $testData = [
+      'payment_processor_id' => $this->ngPaymentProcessorId,
+      'iban' => self::TEST_IBAN,
+      'bic' => self::TEST_BIC_VALID,
+      'contribution_id' => $contributionId,
+    ];
+
+    $pending = CRM_Core_Payment_SDDNG::getPendingContributionID();
+    $this->assertNull($pending);
+    CRM_Core_Payment_SDDNG::setPendingMandateData($testData);
+
+    $storedData = CRM_Core_Payment_SDDNG::releasePendingMandateData($wrongId);
+
+    $this->assertNull($storedData);
   }
 
   /**
    * Test that getPendingContributionID returns null when no contribution is set.
    */
   public function testGetPendingContributionIDNoData(): void {
-    // Clear any pending data
     CRM_Core_Payment_SDDNG::releasePendingMandateData(999);
 
     $contributionId = CRM_Core_Payment_SDDNG::getPendingContributionID();
@@ -241,7 +209,6 @@ class CRM_Sepapp_EdgeCaseTest extends TestCase implements HeadlessInterface, Tra
    * Test that mandate creation works with recurring contributions.
    */
   public function testRecurringContributionMandateCreation(): void {
-    // Create a recurring contribution
     $recurResult = ContributionRecur::create(FALSE)->setValues([
         'contact_id' => 1,
         'amount' => 100.00,
@@ -290,14 +257,43 @@ class CRM_Sepapp_EdgeCaseTest extends TestCase implements HeadlessInterface, Tra
   public function testGetText(): void {
     $sddng = new CRM_Core_Payment_SDDNG();
 
-    // Test agreement title
     $agreementTitle = $sddng->getText('agreementTitle', []);
     $this->assertEquals('Agreement', $agreementTitle);
 
-    // Test agreement text
     $agreementText = $sddng->getText('agreementText', []);
     $this->assertStringContainsString('direct debit', $agreementText);
     $this->assertStringContainsString('bank account', $agreementText);
+  }
+
+  /**
+   * Test the processContribution method with pending mandate data.
+   */
+  public function testProcessContributionWithPendingMandate(): void {
+    $contributionId = 555;
+    $testData = [
+      'payment_processor_id' => $this->ngPaymentProcessorId,
+      'iban' => self::TEST_IBAN,
+      'bic' => self::TEST_BIC_VALID,
+      'contribution_id' => $contributionId,
+    ];
+
+    CRM_Core_Payment_SDDNG::setPendingMandateData($testData);
+    CRM_Core_Payment_SDDNG::processContribution($contributionId);
+
+    $pendingId = CRM_Core_Payment_SDDNG::getPendingContributionID();
+    $this->assertEquals($contributionId, $pendingId);
+  }
+
+  /**
+   * Test that setPendingContributionID correctly sets the contribution ID.
+   */
+  public function testSetPendingContributionID(): void {
+    $contributionId = 777;
+
+    CRM_Core_Payment_SDDNG::setPendingContributionID($contributionId);
+
+    $pendingId = CRM_Core_Payment_SDDNG::getPendingContributionID();
+    $this->assertEquals($contributionId, $pendingId);
   }
 
 }
