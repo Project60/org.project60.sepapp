@@ -116,6 +116,12 @@ class CRM_Core_Payment_SDDNGPostProcessor implements API_Wrapper {
       $ooff_payment = (int) CRM_Core_PseudoConstant::getKey('CRM_Contribute_BAO_Contribution', 'payment_instrument_id', 'OOFF');
       self::resetContribution($contribution_id, $ooff_payment);
       CRM_Sepapp_Configuration::log("Contribution [{$contribution_id}] adjusted.", CRM_Sepapp_Configuration::LOG_LEVEL_AUDIT);
+
+      // reset any linked event participant(s) to 'Pending from pay later':
+      // for a paid event registration CiviCRM treats the SDD direct debit like a
+      // completed payment and sets the participant to 'Registered', but the money
+      // has not been collected yet (see resetParticipants).
+      self::resetParticipants($contribution_id);
     }
     else {
       // RECURRING DONATION
@@ -187,6 +193,69 @@ class CRM_Core_Payment_SDDNGPostProcessor implements API_Wrapper {
                      AND etx.entity_table = 'civicrm_contribution');", [
                        1 => [$contribution_id, 'Integer'],
                      ]);
+  }
+
+  /**
+   * Reset any event participant(s) linked to this contribution to
+   * 'Pending from pay later'.
+   *
+   * When registering for a paid event, the SDD direct debit payment processor is
+   * treated by CiviCRM core like a completed payment, so the participant is
+   * created with status 'Registered'. The SDD mandate has only been created
+   * though - the money has not been collected yet - so the participant should be
+   * 'Pending from pay later', matching the (already reset) pending contribution.
+   *
+   * Only participants currently in 'Registered' are touched, so we don't override
+   * cancelled/waitlisted/etc. statuses.
+   *
+   * @param $contribution_id int Contribution ID
+   */
+  public static function resetParticipants($contribution_id) {
+    $pending_status_id = (int) CRM_Core_DAO::singleValueQuery(
+      "SELECT id FROM civicrm_participant_status_type WHERE name = 'Pending from pay later'"
+    );
+    $registered_status_id = (int) CRM_Core_DAO::singleValueQuery(
+      "SELECT id FROM civicrm_participant_status_type WHERE name = 'Registered'"
+    );
+    if (!$pending_status_id || !$registered_status_id) {
+      CRM_Sepapp_Configuration::log("Couldn't resolve participant status types, not resetting participant.", CRM_Sepapp_Configuration::LOG_LEVEL_ERROR);
+      return;
+    }
+
+    // find participant(s) linked to this contribution
+    $participant_payments = civicrm_api3('ParticipantPayment', 'get', [
+      'contribution_id' => $contribution_id,
+      'option.limit' => 0,
+    ]);
+    foreach ($participant_payments['values'] as $participant_payment) {
+      $participant_id = (int) $participant_payment['participant_id'];
+
+      // only downgrade 'Registered' participants
+      $current_status_id = (int) CRM_Core_DAO::singleValueQuery(
+        "SELECT status_id FROM civicrm_participant WHERE id = %1",
+        [1 => [$participant_id, 'Integer']]
+      );
+      if ($current_status_id !== $registered_status_id) {
+        continue;
+      }
+
+      try {
+        civicrm_api3('Participant', 'create', [
+          'id' => $participant_id,
+          'status_id' => $pending_status_id,
+        ]);
+      }
+      catch (Exception $ex) {
+        // don't leave it as 'Registered' - fall back to SQL
+        $error_message = $ex->getMessage();
+        CRM_Sepapp_Configuration::log("SDD reset participant via API failed ('{$error_message}'), using SQL...", CRM_Sepapp_Configuration::LOG_LEVEL_INFO);
+        CRM_Core_DAO::executeQuery("UPDATE civicrm_participant SET status_id = %1 WHERE id = %2;", [
+          1 => [$pending_status_id, 'Integer'],
+          2 => [$participant_id, 'Integer'],
+        ]);
+      }
+      CRM_Sepapp_Configuration::log("Participant [{$participant_id}] reset to 'Pending from pay later'.", CRM_Sepapp_Configuration::LOG_LEVEL_AUDIT);
+    }
   }
 
   /**
