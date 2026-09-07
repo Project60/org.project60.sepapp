@@ -62,8 +62,8 @@ function sepapp_civicrm_buildForm($formName, &$form) {
         $test_pp_creditor = NULL;
 
         if (!empty($pp_id)) {
-          $creditor_id = CRM_Core_BAO_Setting::getItem('SEPA Direct Debit PP', 'pp' . $pp_id);
-          $test_creditor_id = CRM_Core_BAO_Setting::getItem('SEPA Direct Debit PP', 'pp_test' . $pp_id);
+          $creditor_id = Civi::settings()->get('pp' . $pp_id);
+          $test_creditor_id = Civi::settings()->get('pp_test' . $pp_id);
         }
 
         // load settings from creditor
@@ -103,7 +103,7 @@ function sepapp_civicrm_buildForm($formName, &$form) {
   }
   // PAYMENT PROCESS MAIN PAGE
   elseif ($formName == "CRM_Contribute_Form_Contribution_Main") {
-    $mendForm = CRM_Core_BAO_Setting::getItem('SEPA Direct Debit Preferences', 'pp_improve_frequency');
+    $mendForm = Civi::settings()->get('pp_improve_frequency');
     if ($mendForm) {
       // inject improved form logic
       CRM_Core_Region::instance('page-body')->add([
