@@ -73,13 +73,11 @@ class CRM_Sepapp_SddngFormTest extends \PHPUnit\Framework\TestCase implements He
   /**
    * The collection day and start date are not offered on the payment form.
    *
-   * This is the behavior described as C5 in code_review.md: SDDNG defines its
-   * field list in _getPaymentFormFields(), whose leading underscore means it
-   * overrides nothing, so the form falls back to core's direct debit fields
-   * and the donor cannot choose a collection day - even though the metadata
-   * above describes one. Fixing C5 will make this test fail.
-   *
-   * @todo see code_review.md C5
+   * SDDNG defines its field list in _getPaymentFormFields(), whose leading
+   * underscore means it overrides nothing, so the form falls back to core's
+   * direct debit fields and the donor cannot choose a collection day - even
+   * though the metadata above describes one. Fixing that will make this test
+   * fail.
    */
   public function testGetPaymentFormFieldsOmitsCycleDay(): void {
     $fields = $this->getSddngProcessor()->getPaymentFormFields();

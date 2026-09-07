@@ -98,11 +98,8 @@ class CRM_Sepapp_SddngPostProcessorRcurTest extends \PHPUnit\Framework\TestCase 
   /**
    * A cycle day chosen by the donor is overruled by the creditor's cycle days.
    *
-   * This is the behavior described as C7 in code_review.md: SDD honors
-   * $params['cycle_day'], SDDNG discards it. The test documents the current
-   * SDDNG behavior - fixing C7 will make it fail.
-   *
-   * @todo see code_review.md C7
+   * SDD honors $params['cycle_day'], SDDNG discards it. The test documents the
+   * current SDDNG behavior - aligning SDDNG with SDD will make it fail.
    */
   public function testCycleDayChosenByDonorIsDiscarded(): void {
     $recur = $this->createRecurringPayment(['cycle_day' => 5]);

@@ -37,9 +37,7 @@ class CRM_Sepapp_SddngHandoverTest extends \PHPUnit\Framework\TestCase implement
    *
    * KNOWN DEFECT - expected to fail: setPendingMandateData() calls
    * array_merge(self::$_pending_mandate, $data) on a NULL static, which is a
-   * TypeError. See finding C4 in code_review.md and the note at the end of
-   * issue_002.md: the fix is
-   * array_merge(self::$_pending_mandate ?? [], $data).
+   * TypeError. The fix is array_merge(self::$_pending_mandate ?? [], $data).
    */
   public function testSetPendingMandateDataWithNothingPending(): void {
     CRM_Core_Payment_SDDNG::setPendingMandateData([

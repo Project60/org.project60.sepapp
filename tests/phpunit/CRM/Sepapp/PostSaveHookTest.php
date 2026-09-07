@@ -13,10 +13,9 @@ use Civi\Test\TransactionalInterface;
  * either from the Contribution.completetransaction API wrapper or from the
  * Confirm form's postProcess hook.
  *
- * Several tests here document finding C2 of code_review.md (see issue_002.md):
- * the postSave hook is unconditional and site wide, so any contribution saved
- * in the same request hijacks the handover. They are expected to fail until
- * that is fixed.
+ * Several tests here document a known defect: the postSave hook is
+ * unconditional and site wide, so any contribution saved in the same request
+ * hijacks the handover. They are expected to fail until that is fixed.
  *
  * @group headless
  */
@@ -47,8 +46,7 @@ class CRM_Sepapp_PostSaveHookTest extends \PHPUnit\Framework\TestCase implements
    *
    * KNOWN DEFECT - expected to fail: the postSave hook writes the contribution
    * ID into the handover state unconditionally, which leaves a junk record
-   * behind for every contribution the site ever saves. See finding C2
-   * (failure mode B) in code_review.md and issue_002.md.
+   * behind for every contribution the site ever saves.
    */
   public function testNothingPendingLeavesNoJunkState(): void {
     $this->createTestContribution();
@@ -62,8 +60,7 @@ class CRM_Sepapp_PostSaveHookTest extends \PHPUnit\Framework\TestCase implements
    * KNOWN DEFECT - expected to fail: the junk record left by the postSave hook
    * makes the "is a mandate already pending?" guard in doDirectPayment()
    * engage, and a perfectly valid payment is aborted with "SDD
-   * PaymentProcessor NG: workflow broken." See finding C2 (failure mode B) in
-   * code_review.md and issue_002.md.
+   * PaymentProcessor NG: workflow broken."
    */
   public function testUnrelatedContributionDoesNotAbortValidPayment(): void {
     $unrelated = $this->createTestContribution();
@@ -80,8 +77,7 @@ class CRM_Sepapp_PostSaveHookTest extends \PHPUnit\Framework\TestCase implements
    * state to the unrelated contribution, so releasing the data for the SEPA
    * contribution hits the ID mismatch and silently returns NULL - the
    * contribution completes without a mandate and the money is never
-   * collected. See finding C2 (failure mode A) in code_review.md and
-   * issue_002.md.
+   * collected.
    */
   public function testPendingMandateSurvivesUnrelatedContribution(): void {
     $this->startNgPayment(['invoiceID' => self::TEST_INVOICE_ID]);
@@ -100,8 +96,7 @@ class CRM_Sepapp_PostSaveHookTest extends \PHPUnit\Framework\TestCase implements
    * ID is not passed in but taken from the handover state, which the postSave
    * hook has re-pointed to the unrelated contribution. The mandate is created
    * against that one, which is then also reset to pending and stripped of its
-   * financial transactions. See finding C2 (failure mode A) in code_review.md
-   * and issue_002.md.
+   * financial transactions.
    */
   public function testUnrelatedContributionDoesNotGetTheMandate(): void {
     $this->startNgPayment(['invoiceID' => self::TEST_INVOICE_ID]);

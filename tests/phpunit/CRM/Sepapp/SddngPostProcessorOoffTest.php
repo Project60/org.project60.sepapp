@@ -97,7 +97,7 @@ class CRM_Sepapp_SddngPostProcessorOoffTest extends \PHPUnit\Framework\TestCase 
   /**
    * The mandate belongs to the creditor configured on the payment processor.
    *
-   * This pins down the creditor lookup flagged as C3 in code_review.md:
+   * This pins down the creditor lookup:
    * createPendingMandate() loads the creditor with api3 'get' but reads
    * $creditor['id'] as if it had used 'getsingle'. That happens to work,
    * because api3 'get' puts the ID at the top level for single results - so
@@ -146,8 +146,8 @@ class CRM_Sepapp_SddngPostProcessorOoffTest extends \PHPUnit\Framework\TestCase 
   /**
    * The financial transactions booked before the mandate existed are removed.
    *
-   * Finding C8 of code_review.md is about the removal leaving the entity links
-   * behind, which is why this test looks at both tables.
+   * The removal is known to leave the entity links behind, which is why this
+   * test looks at both tables.
    */
   public function testFinancialTransactionsAreRemoved(): void {
     $this->startNgPayment();
