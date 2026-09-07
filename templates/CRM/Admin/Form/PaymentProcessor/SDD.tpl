@@ -63,7 +63,6 @@
     cj('#test_url_site').parent().parent().remove();
     cj('#test_url_recur').parent().parent().remove();
     cj('.crm-paymentProcessor-form-block-accept_credit_cards').hide();
-    cj('tr.crm-paymentProcessor-form-block-payment-instrument-id').hide();
 
     // adjust help text
     cj('.crm-paymentProcessor-form-block-user_name').find('.helpicon').replaceWith(cj('#creditor_id_help'));
