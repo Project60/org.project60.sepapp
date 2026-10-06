@@ -44,10 +44,10 @@ class CRM_Sepapp_Upgrader extends CRM_Extension_Upgrader_Base {
   protected function revivedSDDPaymentProcessors() {
     // INSTALL OLD PROCESSOR
     $sdd_pp_type_ids = [];
-    $sdd_pp          = civicrm_api3('PaymentProcessorType', 'get', array('name' => PP_SDD_PROCESSOR_TYPE));
+    $sdd_pp          = civicrm_api3('PaymentProcessorType', 'get', ['name' => PP_SDD_PROCESSOR_TYPE]);
     if (empty($sdd_pp['id'])) {
       // doesn't exist yet => create
-      $payment_processor_data         = array(
+      $payment_processor_data         = [
         "name"                   => "SEPA_Direct_Debit",
         "title"                  => E::ts("SEPA Direct Debit"),
         "description"            => E::ts("Payment processor for the 'Single European Payment Area' (SEPA)."),
@@ -61,7 +61,7 @@ class CRM_Sepapp_Upgrader extends CRM_Extension_Upgrader_Base {
         "billing_mode"           => "1",
         "is_recur"               => "1",
         "payment_type"           => CRM_Core_Payment::PAYMENT_TYPE_DIRECT_DEBIT,
-      );
+      ];
       $result                         = civicrm_api3('PaymentProcessorType', 'create', $payment_processor_data);
       $sdd_pp_type_ids[$result['id']] = 'Payment_SDD';
       CRM_Sepapp_Configuration::log(
@@ -76,19 +76,19 @@ class CRM_Sepapp_Upgrader extends CRM_Extension_Upgrader_Base {
         $result = civicrm_api3(
         'PaymentProcessorType',
         'create',
-        array(
+        [
           'id'        => $sdd_pp['id'],
           'is_active' => 1,
-        )
+        ]
         );
       }
     }
 
     // INSTALL NEW/NG PROCESSOR
-    $sdd_pp_ng = civicrm_api3('PaymentProcessorType', 'get', array('name' => PP_SDD_PROCESSOR_TYPE_NEW));
+    $sdd_pp_ng = civicrm_api3('PaymentProcessorType', 'get', ['name' => PP_SDD_PROCESSOR_TYPE_NEW]);
     if (empty($sdd_pp_ng['id'])) {
       // doesn't exist yet => create
-      $payment_processor_data         = array(
+      $payment_processor_data         = [
         "name"                   => PP_SDD_PROCESSOR_TYPE_NEW,
         "title"                  => E::ts("SEPA Direct Debit (NEW)"),
         "description"            => E::ts(
@@ -104,7 +104,7 @@ class CRM_Sepapp_Upgrader extends CRM_Extension_Upgrader_Base {
         "billing_mode"           => "1",
         "is_recur"               => "1",
         "payment_type"           => CRM_Core_Payment::PAYMENT_TYPE_DIRECT_DEBIT,
-      );
+      ];
       $result                         = civicrm_api3('PaymentProcessorType', 'create', $payment_processor_data);
       $sdd_pp_type_ids[$result['id']] = 'Payment_SDDNG';
       CRM_Sepapp_Configuration::log(
@@ -119,10 +119,10 @@ class CRM_Sepapp_Upgrader extends CRM_Extension_Upgrader_Base {
         $result = civicrm_api3(
         'PaymentProcessorType',
         'create',
-        array(
+        [
           'id'        => $sdd_pp_ng['id'],
           'is_active' => 1,
-        )
+        ]
         );
       }
     }
