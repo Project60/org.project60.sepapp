@@ -121,7 +121,10 @@ class CRM_Core_Payment_SDDNGPostProcessor implements API_Wrapper {
       // for a paid event registration CiviCRM treats the SDD direct debit like a
       // completed payment and sets the participant to 'Registered', but the money
       // has not been collected yet (see resetParticipants).
-      self::resetParticipants($contribution_id);
+      // This can be disabled in the payment processor configuration.
+      if (CRM_Sepapp_Configuration::resetParticipantsEnabled($params['payment_processor_id'])) {
+        self::resetParticipants($contribution_id);
+      }
     }
     else {
       // RECURRING DONATION

@@ -18,3 +18,8 @@
     <p>{ts domain="org.project60.sepapp"}Select the creditor, that should be used for this payment processor.{/ts}</p>
     <p>{ts domain="org.project60.sepapp"}The creditor object not only determines the creditor ID, but also the account and the SEPA file format to be used.{/ts}</p>
 {/htxt}
+
+{htxt id='id-reset-participants-help'}
+    <p>{ts domain="org.project60.sepapp"}If enabled, event participants paying with a one-off SEPA direct debit are set to 'Pending from pay later' instead of 'Registered', since the money has not been collected yet.{/ts}</p>
+    <p>{ts domain="org.project60.sepapp"}Only participants with the status 'Registered' are changed.{/ts}</p>
+{/htxt}

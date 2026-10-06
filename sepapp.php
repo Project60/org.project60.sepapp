@@ -94,6 +94,12 @@ function sepapp_civicrm_buildForm($formName, &$form) {
         $form->assign('creditors', $creditors);
         $form->assign('test_creditors', $test_creditors);
 
+        // option: reset event participants to 'Pending from pay later'
+        $form->add('checkbox', 'sdd_reset_participants', E::ts("Set event participants to 'Pending from pay later'"));
+        $form->setDefaults([
+          'sdd_reset_participants' => empty($pp_id) ? 0 : (int) CRM_Sepapp_Configuration::resetParticipantsEnabled($pp_id),
+        ]);
+
         // add new elements
         CRM_Core_Region::instance('page-body')->add([
           'template' => 'CRM/Admin/Form/PaymentProcessor/SDD.tpl',
@@ -254,6 +260,7 @@ function sepapp_civicrm_postProcess($formName, &$form) {
           // FIXME: we might consider saving this as a JSON object
           Civi::settings()->set('pp' . $pp_id, $creditor_id);
           Civi::settings()->set('pp_test' . $pp_id, $test_creditor_id);
+          Civi::settings()->set('pp_reset_participants' . $pp_id, empty($form->_submitValues['sdd_reset_participants']) ? 0 : 1);
         }
       }
       catch (Exception $ex) {

@@ -149,17 +149,57 @@ class CRM_Sepapp_BasicTest extends \PHPUnit\Framework\TestCase implements Headle
   /**
    * A paid event registration paid via SDD must leave the participant in
    * 'Pending from pay later', not 'Registered', since the money has not been
-   * collected yet.
+   * collected yet - if enabled for the payment processor.
    */
   public function testEventParticipantResetNG(): void {
+    Civi::settings()->set('pp_reset_participants1', 1);
+    $participant_id = $this->runEventRegistration();
+
+    $pending_status_id = \Civi\Api4\ParticipantStatusType::get(FALSE)
+      ->addWhere('name', '=', 'Pending from pay later')
+      ->execute()->first()['id'];
+    $updated = \Civi\Api4\Participant::get(FALSE)
+      ->addWhere('id', '=', $participant_id)
+      ->execute()->first();
+    $this->assertEquals(
+      $pending_status_id,
+      $updated['status_id'],
+      "Participant should be reset to 'Pending from pay later'"
+    );
+  }
+
+  /**
+   * By default, the participant status must not be touched.
+   */
+  public function testEventParticipantNoResetByDefaultNG(): void {
+    Civi::settings()->revert('pp_reset_participants1');
+    $participant_id = $this->runEventRegistration();
+
+    $registered_status_id = \Civi\Api4\ParticipantStatusType::get(FALSE)
+      ->addWhere('name', '=', 'Registered')
+      ->execute()->first()['id'];
+    $updated = \Civi\Api4\Participant::get(FALSE)
+      ->addWhere('id', '=', $participant_id)
+      ->execute()->first();
+    $this->assertEquals(
+      $registered_status_id,
+      $updated['status_id'],
+      "Participant should stay 'Registered'"
+    );
+  }
+
+  /**
+   * Create a 'Registered' participant linked to an SDD contribution and
+   * run the post processor on it.
+   *
+   * @return int participant ID
+   */
+  protected function runEventRegistration(): int {
     $test_id = 'event-' . mt_rand();
     $contribution = $this->createTestContribution($test_id);
 
     $registered_status_id = \Civi\Api4\ParticipantStatusType::get(FALSE)
       ->addWhere('name', '=', 'Registered')
-      ->execute()->first()['id'];
-    $pending_status_id = \Civi\Api4\ParticipantStatusType::get(FALSE)
-      ->addWhere('name', '=', 'Pending from pay later')
       ->execute()->first()['id'];
 
     // create an event with a participant 'Registered' linked to the contribution
@@ -190,15 +230,7 @@ class CRM_Sepapp_BasicTest extends \PHPUnit\Framework\TestCase implements Headle
     ]);
     CRM_Core_Payment_SDDNGPostProcessor::createPendingMandate();
 
-    // the participant should now be 'Pending from pay later'
-    $updated = \Civi\Api4\Participant::get(FALSE)
-      ->addWhere('id', '=', $participant['id'])
-      ->execute()->first();
-    $this->assertEquals(
-      $pending_status_id,
-      $updated['status_id'],
-      "Participant should be reset to 'Pending from pay later'"
-    );
+    return (int) $participant['id'];
   }
 
   public function createTestContribution(string $name): array {
