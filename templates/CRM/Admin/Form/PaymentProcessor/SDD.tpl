@@ -54,6 +54,18 @@
    href="#" title="{ts escape='htmlattribute' domain="org.project60.sepapp"}Help{/ts}" class="helpicon">&nbsp;</a>
 
 
+{* Option: reset event participants to 'Pending from pay later' *}
+<table id="sdd_reset_participants_table" style="display:none;">
+  <tr class="crm-paymentProcessor-form-block-sdd_reset_participants">
+    <td></td>
+    <td>{$form.sdd_reset_participants.html}&nbsp;{$form.sdd_reset_participants.label}
+      <a id='sdd_reset_participants_help'
+         onclick='CRM.help("{ts escape='htmlattribute' domain="org.project60.sepapp"}Event Participants{/ts}", {literal}{"id":"id-reset-participants-help","file":"CRM\/Admin\/Form\/PaymentProcessor/SDD"}{/literal}); return false;'
+         href="#" title="{ts escape='htmlattribute' domain="org.project60.sepapp"}Help{/ts}" class="helpicon">&nbsp;</a>
+    </td>
+  </tr>
+</table>
+
 <script type="text/javascript">
 
     {literal}
@@ -70,6 +82,9 @@
     // replace creditor selector
     cj('#user_name').replaceWith(cj('#creditor_id'));
     cj('#test_user_name').replaceWith(cj('#test_creditor_id'));
+    // move participant reset option below the 'default' checkbox
+    cj('tr.crm-paymentProcessor-form-block-sdd_reset_participants').insertAfter('tr.crm-paymentProcessor-form-block-is_default');
+    cj('#sdd_reset_participants_table').remove();
 
 </script>
 {/literal}
