@@ -95,6 +95,7 @@ class CRM_Core_Payment_SDDNGPostProcessor implements API_Wrapper {
       // create mandate
       CRM_Sepapp_Configuration::log("createPendingMandate creating OOFF mandate", CRM_Sepapp_Configuration::LOG_LEVEL_INFO);
       $mandate = civicrm_api3('SepaMandate', 'create', [
+        'account_holder' => $params['account_holder'] ?? NULL,
         'creditor_id' => $creditor['id'],
         'type' => 'OOFF',
         'iban' => $params['iban'],
@@ -122,6 +123,7 @@ class CRM_Core_Payment_SDDNGPostProcessor implements API_Wrapper {
       // create mandate
       CRM_Sepapp_Configuration::log("createPendingMandate creating RCUR mandate", CRM_Sepapp_Configuration::LOG_LEVEL_INFO);
       $mandate = civicrm_api3('SepaMandate', 'create', [
+        'account_holder' => $params['account_holder'] ?? NULL,
         'creditor_id' => $creditor['id'],
         'type' => 'RCUR',
         'iban' => $params['iban'],
